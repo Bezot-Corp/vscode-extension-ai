@@ -24,13 +24,13 @@ importers:
         specifier: ^14.1.1
         version: 14.1.1(semantic-release@25.0.3(typescript@5.9.3))
       '@types/node':
-        specifier: ^20.0.0
+        specifier: ^20.19.41
         version: 20.19.41
       '@types/vscode':
-        specifier: ^1.85.0
+        specifier: ^1.120.0
         version: 1.120.0
       '@vscode/vsce':
-        specifier: ^3.0.0
+        specifier: ^3.9.2
         version: 3.9.2
       semantic-release:
         specifier: ^25.0.3
@@ -39,7 +39,7 @@ importers:
         specifier: ^6.1.5
         version: 6.1.5(semantic-release@25.0.3(typescript@5.9.3))
       typescript:
-        specifier: ^5.0.0
+        specifier: ^5.9.3
         version: 5.9.3
 
 packages:

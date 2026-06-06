@@ -43,11 +43,11 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^12.0.8",
     "@semantic-release/release-notes-generator": "^14.1.1",
-    "@types/node": "^20.0.0",
-    "@types/vscode": "^1.85.0",
-    "@vscode/vsce": "^3.0.0",
+    "@types/node": "^20.19.41",
+    "@types/vscode": "^1.120.0",
+    "@vscode/vsce": "^3.9.2",
     "semantic-release": "^25.0.3",
     "semantic-release-vsce": "^6.1.5",
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3"
   }
 }
