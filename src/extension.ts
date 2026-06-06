@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as http from 'http';
+import * as http from 'node:http';
 
 const VSCODE_PORT = 4190;
 const IDE_BRIDGE_PORT = 4188;
