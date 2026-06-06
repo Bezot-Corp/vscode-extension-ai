@@ -2,7 +2,7 @@
   "name": "bezotcorp-ai",
   "displayName": "BezotCorp AI",
   "description": "Local AI coding assistant for VS Code.",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "publisher": "bezotcorp",
   "icon": "assets/icon.png",
   "galleryBanner": {
