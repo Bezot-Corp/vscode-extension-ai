@@ -2,7 +2,7 @@
   "name": "bezot-ai",
   "displayName": "Bezot AI",
   "description": "Local AI coding assistant for VS Code.",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "publisher": "bezot",
   "license": "MIT",
   "repository": {
@@ -34,12 +34,20 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "pnpm compile && vsce package"
+    "package": "pnpm compile && vsce package",
+    "release": "semantic-release"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.8",
+    "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.0.0",
+    "semantic-release": "^25.0.3",
+    "semantic-release-vsce": "^6.1.5",
     "typescript": "^5.0.0"
   }
 }
