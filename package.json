@@ -1,0 +1,45 @@
+{
+  "name": "bezot-ai",
+  "displayName": "Bezot AI",
+  "description": "Local AI coding assistant for VS Code.",
+  "version": "0.1.0",
+  "publisher": "bezot",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bezot-Corp/vscode-extension-ai.git"
+  },
+  "homepage": "https://github.com/Bezot-Corp/vscode-extension-ai",
+  "bugs": {
+    "url": "https://github.com/Bezot-Corp/vscode-extension-ai/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "assistant",
+    "coding",
+    "rust",
+    "local"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {},
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "pnpm compile && vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.0.0"
+  }
+}

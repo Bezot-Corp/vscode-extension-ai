@@ -1,0 +1,6 @@
+src/**
+scripts/**
+.vscode/**
+.git/**
+pnpm-lock.yaml
+tsconfig.json
