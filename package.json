@@ -3,7 +3,7 @@
   "displayName": "Bezot AI",
   "description": "Local AI coding assistant for VS Code.",
   "version": "0.0.0",
-  "publisher": "bezot",
+  "publisher": "bezotcorp",
   "license": "MIT",
   "repository": {
     "type": "git",
