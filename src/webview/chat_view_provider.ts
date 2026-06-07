@@ -8,6 +8,7 @@ import { getChatHtml } from './chat_html';
 type WebviewMessage = {
   type: string;
   text?: string;
+  includeActiveFile?: boolean;
 };
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
@@ -32,7 +33,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
 
       if (message.type === 'chat') {
-        await this.sendChatMessage(webviewView, message.text ?? '');
+        await this.sendChatMessage(webviewView, message.text ?? '', message.includeActiveFile ?? true);
       }
     });
 
@@ -60,12 +61,24 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  private async sendChatMessage(webviewView: vscode.WebviewView, text: string): Promise<void> {
+  private async sendChatMessage(
+    webviewView: vscode.WebviewView,
+    text: string,
+    includeActiveFile: boolean,
+  ): Promise<void> {
     const config = getExtensionConfig();
     const provider = createProvider(config);
 
     try {
-      const context = await buildChatContext(config.contextMode);
+      const context = await buildChatContext(config.contextMode, {
+        includeActiveFile,
+      });
+
+      webviewView.webview.postMessage({
+        type: 'contextStatus',
+        activeFilePath: context.activeFile?.path,
+      });
+
       const result = await provider.chat({ message: text, context });
 
       webviewView.webview.postMessage({

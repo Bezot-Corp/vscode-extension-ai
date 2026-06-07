@@ -9,6 +9,8 @@ const settings = document.getElementById('settings');
 const testConnection = document.getElementById('test-connection');
 const backendStatus = document.getElementById('backend-status');
 const backendUrl = document.getElementById('backend-url');
+const includeActiveFile = document.getElementById('include-active-file');
+const activeFileStatus = document.getElementById('active-file-status');
 
 function addMessage(text, role) {
   const div = document.createElement('div');
@@ -30,7 +32,11 @@ function sendMessage() {
   input.style.height = 'auto';
   send.disabled = true;
 
-  vscode.postMessage({ type: 'chat', text });
+  vscode.postMessage({
+    type: 'chat',
+    text,
+    includeActiveFile: includeActiveFile.checked,
+  });
 }
 
 function updateBackendStatus(status, text, url) {
@@ -44,12 +50,27 @@ function updateBackendStatus(status, text, url) {
   backendUrl.textContent = url ? 'Backend: ' + url : '';
 }
 
+function updateContextStatus(activeFilePath) {
+  if (!includeActiveFile.checked) {
+    activeFileStatus.textContent = 'Active file disabled.';
+    return;
+  }
+
+  activeFileStatus.textContent = activeFilePath
+    ? 'Attached: ' + activeFilePath
+    : 'No active file attached.';
+}
+
 settings.addEventListener('click', () => {
   vscode.postMessage({ type: 'openSettings' });
 });
 
 testConnection.addEventListener('click', () => {
   vscode.postMessage({ type: 'testConnection' });
+});
+
+includeActiveFile.addEventListener('change', () => {
+  updateContextStatus(undefined);
 });
 
 send.addEventListener('click', sendMessage);
@@ -76,6 +97,10 @@ window.addEventListener('message', (event) => {
 
   if (msg.type === 'backendStatus') {
     updateBackendStatus(msg.status, msg.text, msg.backendUrl);
+  }
+
+  if (msg.type === 'contextStatus') {
+    updateContextStatus(msg.activeFilePath);
   }
 });
 `;
