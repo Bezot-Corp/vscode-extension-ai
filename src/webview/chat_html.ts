@@ -21,6 +21,7 @@ ${getChatStyles()}
     <div id="backend-url"></div>
     <button id="test-connection">Test Connection</button>
     <button id="settings">Open Settings</button>
+    <button id="clear-history">Clear History</button>
   </div>
 </div>
 
