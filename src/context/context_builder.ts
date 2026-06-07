@@ -6,8 +6,12 @@ import { ChatContext, ContextFile } from './chat_context';
 const MAX_FILE_CHARS = 40_000;
 const MAX_OPEN_FILES = 8;
 
-export async function buildChatContext(mode: ContextMode): Promise<ChatContext> {
-  const activeFile = getActiveFile();
+export type ContextBuildOptions = {
+  includeActiveFile: boolean;
+};
+
+export async function buildChatContext(mode: ContextMode, options: ContextBuildOptions): Promise<ChatContext> {
+  const activeFile = options.includeActiveFile ? getActiveFile() : undefined;
 
   if (mode === 'basic') {
     return {

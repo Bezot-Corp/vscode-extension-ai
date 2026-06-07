@@ -24,6 +24,14 @@ ${getChatStyles()}
   </div>
 </div>
 
+<div id="context-card">
+  <label>
+    <input id="include-active-file" type="checkbox" checked>
+    Include active file
+  </label>
+  <div id="active-file-status">Active file will be attached when available.</div>
+</div>
+
 <div id="messages"></div>
 
 <div id="input-area">
