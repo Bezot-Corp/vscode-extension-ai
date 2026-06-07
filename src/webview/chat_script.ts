@@ -10,10 +10,19 @@ const testConnection = document.getElementById('test-connection');
 const backendStatus = document.getElementById('backend-status');
 const backendUrl = document.getElementById('backend-url');
 const includeActiveFile = document.getElementById('include-active-file');
+const includeOpenFiles = document.getElementById('include-open-files');
 const activeFileStatus = document.getElementById('active-file-status');
+const openFilesStatus = document.getElementById('open-files-status');
 const contextMode = document.getElementById('context-mode');
 const contextPreviewActiveFile = document.getElementById('context-preview-active-file');
 const contextPreviewOpenFiles = document.getElementById('context-preview-open-files');
+
+function getContextOptions() {
+  return {
+    includeActiveFile: includeActiveFile.checked,
+    includeOpenFiles: includeOpenFiles.checked,
+  };
+}
 
 function addMessage(text, role) {
   const div = document.createElement('div');
@@ -38,7 +47,7 @@ function sendMessage() {
   vscode.postMessage({
     type: 'chat',
     text,
-    includeActiveFile: includeActiveFile.checked,
+    ...getContextOptions(),
   });
 }
 
@@ -53,15 +62,20 @@ function updateBackendStatus(status, text, url) {
   backendUrl.textContent = url ? 'Backend: ' + url : '';
 }
 
-function updateContextStatus(activeFilePath) {
+function updateContextStatus(activeFilePath, openFilesCount) {
   if (!includeActiveFile.checked) {
     activeFileStatus.textContent = 'Active file disabled.';
-    return;
+  } else {
+    activeFileStatus.textContent = activeFilePath
+      ? 'Attached: ' + activeFilePath
+      : 'No active file attached.';
   }
 
-  activeFileStatus.textContent = activeFilePath
-    ? 'Attached: ' + activeFilePath
-    : 'No active file attached.';
+  if (!includeOpenFiles.checked) {
+    openFilesStatus.textContent = 'Open files disabled.';
+  } else {
+    openFilesStatus.textContent = 'Open files attached: ' + openFilesCount;
+  }
 }
 
 function updateContextPreview(mode, activeFilePath, openFilesCount) {
@@ -72,12 +86,14 @@ function updateContextPreview(mode, activeFilePath, openFilesCount) {
     : 'Active file: none';
 
   contextPreviewOpenFiles.textContent = 'Open files: ' + openFilesCount;
+
+  updateContextStatus(activeFilePath, openFilesCount);
 }
 
 function refreshContextPreview() {
   vscode.postMessage({
     type: 'refreshContextPreview',
-    includeActiveFile: includeActiveFile.checked,
+    ...getContextOptions(),
   });
 }
 
@@ -89,10 +105,8 @@ testConnection.addEventListener('click', () => {
   vscode.postMessage({ type: 'testConnection' });
 });
 
-includeActiveFile.addEventListener('change', () => {
-  updateContextStatus(undefined);
-  refreshContextPreview();
-});
+includeActiveFile.addEventListener('change', refreshContextPreview);
+includeOpenFiles.addEventListener('change', refreshContextPreview);
 
 send.addEventListener('click', sendMessage);
 
@@ -118,10 +132,6 @@ window.addEventListener('message', (event) => {
 
   if (msg.type === 'backendStatus') {
     updateBackendStatus(msg.status, msg.text, msg.backendUrl);
-  }
-
-  if (msg.type === 'contextStatus') {
-    updateContextStatus(msg.activeFilePath);
   }
 
   if (msg.type === 'contextPreview') {
