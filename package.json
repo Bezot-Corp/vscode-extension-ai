@@ -75,7 +75,17 @@
           "icon": "assets/icon.png"
         }
       ]
-    }
+    },
+    "commands": [
+      {
+        "command": "bezotcorp-ai.openChat",
+        "title": "BezotCorp AI: Open Chat"
+      },
+      {
+        "command": "bezotcorp-ai.openSettings",
+        "title": "BezotCorp AI: Open Settings"
+      }
+    ]
   },
   "scripts": {
     "compile": "tsc -p ./",
