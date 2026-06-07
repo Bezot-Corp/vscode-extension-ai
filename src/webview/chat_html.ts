@@ -15,7 +15,13 @@ ${getChatStyles()}
 <div id="welcome">
   <strong>BezotCorp AI</strong>
   <p>Use your own compatible backend today. The official BezotCorp backend is coming later.</p>
-  <button id="settings">Open Settings</button>
+
+  <div id="backend-card">
+    <div id="backend-status">🟡 Connecting...</div>
+    <div id="backend-url"></div>
+    <button id="test-connection">Test Connection</button>
+    <button id="settings">Open Settings</button>
+  </div>
 </div>
 
 <div id="messages"></div>

@@ -26,7 +26,24 @@ body {
   line-height: 1.4;
 }
 
-#settings {
+#backend-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#backend-status {
+  font-weight: 600;
+}
+
+#backend-url {
+  opacity: 0.8;
+  font-size: 0.9em;
+  word-break: break-all;
+}
+
+#settings,
+#test-connection {
   padding: 5px 10px;
   background: var(--vscode-button-secondaryBackground);
   color: var(--vscode-button-secondaryForeground);
@@ -35,7 +52,8 @@ body {
   cursor: pointer;
 }
 
-#settings:hover {
+#settings:hover,
+#test-connection:hover {
   background: var(--vscode-button-secondaryHoverBackground);
 }
 

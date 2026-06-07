@@ -1,10 +1,14 @@
 export function getChatScript(): string {
   return `
 const vscode = acquireVsCodeApi();
+
 const messages = document.getElementById('messages');
 const input = document.getElementById('input');
 const send = document.getElementById('send');
 const settings = document.getElementById('settings');
+const testConnection = document.getElementById('test-connection');
+const backendStatus = document.getElementById('backend-status');
+const backendUrl = document.getElementById('backend-url');
 
 function addMessage(text, role) {
   const div = document.createElement('div');
@@ -29,8 +33,23 @@ function sendMessage() {
   vscode.postMessage({ type: 'chat', text });
 }
 
+function updateBackendStatus(status, text, url) {
+  const icons = {
+    connected: '🟢',
+    disconnected: '🔴',
+    connecting: '🟡',
+  };
+
+  backendStatus.textContent = (icons[status] ?? '🟡') + ' ' + text;
+  backendUrl.textContent = url ? 'Backend: ' + url : '';
+}
+
 settings.addEventListener('click', () => {
   vscode.postMessage({ type: 'openSettings' });
+});
+
+testConnection.addEventListener('click', () => {
+  vscode.postMessage({ type: 'testConnection' });
 });
 
 send.addEventListener('click', sendMessage);
@@ -53,6 +72,10 @@ window.addEventListener('message', (event) => {
   if (msg.type === 'response') {
     addMessage(msg.text, 'assistant');
     send.disabled = false;
+  }
+
+  if (msg.type === 'backendStatus') {
+    updateBackendStatus(msg.status, msg.text, msg.backendUrl);
   }
 });
 `;
