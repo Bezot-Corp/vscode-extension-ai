@@ -4,9 +4,9 @@
 
 **A configurable AI coding assistant for VS Code.**
 
-BezotCorp AI connects VS Code to AI backends, allowing you to chat with your codebase, inspect files, generate modifications and integrate your own local or remote AI infrastructure.
+BezotCorp AI connects VS Code to local or remote AI providers and gives AI assistants access to your workspace context directly inside VS Code.
 
-Use your own backend today. Connect to the official BezotCorp platform in the future.
+Use Ollama today, connect your own backend, or integrate future BezotCorp services.
 
 ---
 
@@ -14,36 +14,46 @@ Use your own backend today. Connect to the official BezotCorp platform in the fu
 
 ### AI Chat
 
-Interact with AI directly from VS Code.
+Chat directly with AI inside VS Code.
 
-- Natural language conversations
-- Context-aware responses
-- Backend agnostic design
+- Streaming responses
+- Context-aware conversations
+- Provider abstraction
+- Backend health monitoring
 
-### Workspace Integration
+### Workspace Context
 
-Access information from your current workspace.
+Provide useful context to the AI.
 
-- Active file inspection
-- Open files access
-- Project-aware assistance
+- Active file support
+- Open files support
+- Rich workspace context
+- Context preview before requests
 
-### Code Modifications
+### AI Providers
 
-Apply changes directly from AI responses.
+Supported providers:
 
-- Patch existing files
-- Replace code blocks
-- Save changes automatically
+- Ollama
+- Custom Backend
+- Future BezotCorp Backend
 
-### Flexible Backends
+### Connection Management
 
-Choose how BezotCorp AI connects.
+Built-in backend monitoring.
 
-- Local self-hosted backend
-- Remote backend
-- Custom infrastructure
-- Future BezotCorp managed backend
+- Connection testing
+- Status indicator
+- Provider diagnostics
+
+### Local First
+
+Keep full control of your infrastructure.
+
+- Self-hosted AI support
+- Local models with Ollama
+- Remote backends supported
+- No mandatory cloud dependency
 
 ---
 
@@ -58,28 +68,53 @@ Install the extension from:
 
 ## Configuration
 
-BezotCorp AI supports multiple backend modes.
-
-### Custom Backend
-
-Configure your own backend URL:
+### To Ollama
 
 ```json
 {
-  "bezotcorpAi.backendMode": "custom",
-  "bezotcorpAi.backendUrl": "http://127.0.0.1:4188"
+  "bezotcorpAi.provider": "ollama",
+  "bezotcorpAi.providerUrl": "http://127.0.0.1:11434",
+  "bezotcorpAi.model": "qwen2.5-coder:7b"
 }
 ```
 
-### BezotCorp Backend
+### To Custom Backend
 
 ```json
 {
-  "bezotcorpAi.backendMode": "bezotcorp"
+  "bezotcorpAi.provider": "customBackend",
+  "bezotcorpAi.providerUrl": "http://127.0.0.1:4188"
 }
 ```
 
-The hosted BezotCorp backend is planned but not available yet.
+### To Context Mode
+
+```json
+{
+  "bezotcorpAi.contextMode": "basic"
+}
+```
+
+Available modes:
+
+- `basic`
+- `rich`
+
+---
+
+## Commands
+
+### Open Chat
+
+```text
+BezotCorp AI: Open Chat
+```
+
+### Open Settings
+
+```text
+BezotCorp AI: Open Settings
+```
 
 ---
 
@@ -89,14 +124,14 @@ The hosted BezotCorp backend is planned but not available yet.
 VS Code Extension
         │
         ▼
-  Configurable Backend
+    AI Provider
         │
-        ├── Local Backend
-        ├── Remote Backend
+        ├── Ollama
+        ├── Custom Backend
         └── Future BezotCorp Backend
 ```
 
-The extension acts as a lightweight integration layer between VS Code and AI systems.
+The extension manages context collection, provider integration and streaming responses directly inside VS Code.
 
 ---
 
@@ -104,31 +139,54 @@ The extension acts as a lightweight integration layer between VS Code and AI sys
 
 BezotCorp AI does not require any cloud service.
 
-Privacy depends on the backend you choose.
+Privacy depends on the provider you choose.
 
-- Self-hosted backend → your data stays under your control
-- Remote backend → privacy depends on your provider
-- Future BezotCorp backend → policy will be documented separately
+### Ollama
+
+- Local execution
+- Local models
+- Local data
+
+### Custom Backend
+
+- Privacy depends on your infrastructure
+
+### Future BezotCorp Backend
+
+- Policy will be documented separately
 
 ---
 
-## Roadmap
+## Current Features
+
+### Implemented
+
+- AI chat
+- Streaming responses
+- Active file context
+- Open files context
+- Context preview
+- Backend status monitoring
+- Connection testing
+- Ollama integration
+- Custom backend integration
+- VS Code commands
 
 ### Planned
 
-- Workspace semantic graph
+- Chat history persistence
+- Patch preview
 - Multi-file editing
+- Workspace semantic graph
+- Tool calling
 - Agent orchestration
-- Local memory integration
-- Code review mode
-- Refactoring workflows
-- Tool calling system
+- Memory integration
 
 ### Future
 
 - Multi-agent collaboration
-- Project knowledge graph
 - Autonomous coding workflows
+- Project knowledge graph
 - Native Rust ecosystem integration
 
 ---

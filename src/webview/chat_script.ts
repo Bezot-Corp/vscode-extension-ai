@@ -17,6 +17,8 @@ const contextMode = document.getElementById('context-mode');
 const contextPreviewActiveFile = document.getElementById('context-preview-active-file');
 const contextPreviewOpenFiles = document.getElementById('context-preview-open-files');
 
+let currentAssistantMessage = null;
+
 function getContextOptions() {
   return {
     includeActiveFile: includeActiveFile.checked,
@@ -30,6 +32,25 @@ function addMessage(text, role) {
   div.textContent = text;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+function startAssistantMessage() {
+  currentAssistantMessage = addMessage('', 'assistant');
+}
+
+function appendAssistantChunk(text) {
+  if (!currentAssistantMessage) {
+    startAssistantMessage();
+  }
+
+  currentAssistantMessage.textContent += text;
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function endAssistantMessage() {
+  currentAssistantMessage = null;
+  send.disabled = false;
 }
 
 function sendMessage() {
@@ -128,6 +149,18 @@ window.addEventListener('message', (event) => {
   if (msg.type === 'response') {
     addMessage(msg.text, 'assistant');
     send.disabled = false;
+  }
+
+  if (msg.type === 'responseStart') {
+    startAssistantMessage();
+  }
+
+  if (msg.type === 'responseChunk') {
+    appendAssistantChunk(msg.text);
+  }
+
+  if (msg.type === 'responseEnd') {
+    endAssistantMessage();
   }
 
   if (msg.type === 'backendStatus') {

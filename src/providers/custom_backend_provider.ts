@@ -1,5 +1,5 @@
 import { ExtensionConfig } from '../config/extension_config';
-import { AiProvider, ChatRequest, ChatResult, ProviderStatus } from './ai_provider';
+import { AiProvider, ChatRequest, ChatResult, ChatStreamHandler, ProviderStatus } from './ai_provider';
 
 type CustomBackendResponse = {
   content?: string;
@@ -45,5 +45,14 @@ export class CustomBackendProvider implements AiProvider {
     return {
       text: data.content ?? data.error ?? 'no response',
     };
+  }
+
+  async streamChat(request: ChatRequest, handler: ChatStreamHandler): Promise<void> {
+    handler.onStart();
+
+    const result = await this.chat(request);
+
+    handler.onChunk(result.text);
+    handler.onEnd();
   }
 }

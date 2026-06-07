@@ -102,12 +102,30 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         activeFilePath: context.activeFile?.path,
       });
 
-      const result = await provider.chat({ message: text, context });
-
-      webviewView.webview.postMessage({
-        type: 'response',
-        text: result.text,
-      });
+      await provider.streamChat(
+        {
+          message: text,
+          context,
+        },
+        {
+          onStart: () => {
+            webviewView.webview.postMessage({
+              type: 'responseStart',
+            });
+          },
+          onChunk: (chunk: string) => {
+            webviewView.webview.postMessage({
+              type: 'responseChunk',
+              text: chunk,
+            });
+          },
+          onEnd: () => {
+            webviewView.webview.postMessage({
+              type: 'responseEnd',
+            });
+          },
+        },
+      );
     } catch (error) {
       webviewView.webview.postMessage({
         type: 'response',
