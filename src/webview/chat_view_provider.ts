@@ -1,15 +1,13 @@
 import * as vscode from 'vscode';
 
+import { getExtensionConfig } from '../config/extension_config';
+import { buildChatContext } from '../context/context_builder';
+import { createProvider } from '../providers/provider_factory';
 import { getChatHtml } from './chat_html';
 
 type WebviewMessage = {
   type: string;
   text?: string;
-};
-
-type ChatResponse = {
-  content?: string;
-  error?: string;
 };
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
@@ -29,7 +27,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
 
       if (message.type === 'testConnection') {
-        await this.testBackendConnection(webviewView);
+        await this.testConnection(webviewView);
         return;
       }
 
@@ -38,86 +36,41 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
     });
 
-    void this.testBackendConnection(webviewView);
+    void this.testConnection(webviewView);
   }
 
-  private getBackendConfig(): { backendMode: string; backendUrl: string } {
-    const config = vscode.workspace.getConfiguration('bezotcorpAi');
-
-    return {
-      backendMode: config.get<string>('backendMode', 'custom'),
-      backendUrl: config.get<string>('backendUrl', 'http://127.0.0.1:4188').replace(/\/$/, ''),
-    };
-  }
-
-  private async testBackendConnection(webviewView: vscode.WebviewView): Promise<void> {
-    const { backendMode, backendUrl } = this.getBackendConfig();
+  private async testConnection(webviewView: vscode.WebviewView): Promise<void> {
+    const config = getExtensionConfig();
 
     webviewView.webview.postMessage({
       type: 'backendStatus',
       status: 'connecting',
-      backendUrl,
-      text: 'Connecting...',
+      backendUrl: config.providerUrl,
+      text: `Connecting to ${config.provider}...`,
     });
 
-    if (backendMode === 'bezotcorp') {
-      webviewView.webview.postMessage({
-        type: 'backendStatus',
-        status: 'disconnected',
-        backendUrl,
-        text: 'BezotCorp hosted backend is not available yet.',
-      });
-      return;
-    }
+    const provider = createProvider(config);
+    const status = await provider.health();
 
-    try {
-      const response = await fetch(`${backendUrl}/health`, {
-        method: 'GET',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Backend returned HTTP ${response.status}`);
-      }
-
-      webviewView.webview.postMessage({
-        type: 'backendStatus',
-        status: 'connected',
-        backendUrl,
-        text: 'Connected',
-      });
-    } catch (error) {
-      webviewView.webview.postMessage({
-        type: 'backendStatus',
-        status: 'disconnected',
-        backendUrl,
-        text: `Disconnected: ${String(error)}`,
-      });
-    }
+    webviewView.webview.postMessage({
+      type: 'backendStatus',
+      status: status.status,
+      backendUrl: status.providerUrl,
+      text: status.text,
+    });
   }
 
   private async sendChatMessage(webviewView: vscode.WebviewView, text: string): Promise<void> {
-    const { backendMode, backendUrl } = this.getBackendConfig();
-
-    if (backendMode === 'bezotcorp') {
-      webviewView.webview.postMessage({
-        type: 'response',
-        text: 'BezotCorp hosted backend is not available yet. Please use a custom backend for now.',
-      });
-      return;
-    }
+    const config = getExtensionConfig();
+    const provider = createProvider(config);
 
     try {
-      const response = await fetch(`${backendUrl}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-      });
-
-      const data = (await response.json()) as ChatResponse;
+      const context = await buildChatContext(config.contextMode);
+      const result = await provider.chat({ message: text, context });
 
       webviewView.webview.postMessage({
         type: 'response',
-        text: data.content ?? data.error ?? 'no response',
+        text: result.text,
       });
     } catch (error) {
       webviewView.webview.postMessage({
@@ -128,7 +81,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       webviewView.webview.postMessage({
         type: 'backendStatus',
         status: 'disconnected',
-        backendUrl,
+        backendUrl: config.providerUrl,
         text: `Disconnected: ${String(error)}`,
       });
     }

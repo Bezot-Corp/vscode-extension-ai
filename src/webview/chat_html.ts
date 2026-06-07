@@ -14,7 +14,7 @@ ${getChatStyles()}
 <body>
 <div id="welcome">
   <strong>BezotCorp AI</strong>
-  <p>Use your own compatible backend today. The official BezotCorp backend is coming later.</p>
+  <p>Use Ollama, your own backend, or the future BezotCorp backend.</p>
 
   <div id="backend-card">
     <div id="backend-status">🟡 Connecting...</div>

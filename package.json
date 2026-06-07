@@ -41,19 +41,34 @@
     "configuration": {
       "title": "BezotCorp AI",
       "properties": {
-        "bezotcorpAi.backendMode": {
+        "bezotcorpAi.provider": {
           "type": "string",
-          "default": "custom",
+          "default": "ollama",
           "enum": [
-            "custom",
+            "ollama",
+            "customBackend",
             "bezotcorp"
           ],
-          "description": "Backend mode. Use 'custom' for your own compatible backend. The official BezotCorp backend is not available yet."
+          "description": "AI provider used by BezotCorp AI."
         },
-        "bezotcorpAi.backendUrl": {
+        "bezotcorpAi.providerUrl": {
           "type": "string",
-          "default": "http://127.0.0.1:4188",
-          "description": "Custom backend URL compatible with the BezotCorp AI chat API."
+          "default": "http://127.0.0.1:11434",
+          "description": "Provider URL. Ollama default is http://127.0.0.1:11434. Custom backend default is usually http://127.0.0.1:4188."
+        },
+        "bezotcorpAi.model": {
+          "type": "string",
+          "default": "qwen2.5-coder:7b",
+          "description": "Model name used by the selected provider."
+        },
+        "bezotcorpAi.contextMode": {
+          "type": "string",
+          "default": "basic",
+          "enum": [
+            "basic",
+            "rich"
+          ],
+          "description": "Context mode. Basic sends focused context. Rich sends more workspace information."
         }
       }
     },
