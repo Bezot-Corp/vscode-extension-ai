@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
 
-import { IDE_BRIDGE_PORT } from '../constants';
-
 type WebviewMessage = {
   type: string;
   text?: string;
@@ -27,8 +25,20 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         return;
       }
 
+      const config = vscode.workspace.getConfiguration('bezotcorpAi');
+      const backendMode = config.get<string>('backendMode', 'custom');
+      const backendUrl = config.get<string>('backendUrl', 'http://127.0.0.1:4188');
+
+      if (backendMode === 'bezotcorp') {
+        webviewView.webview.postMessage({
+          type: 'response',
+          text: 'BezotCorp hosted backend is not available yet. Please use a custom backend for now.',
+        });
+        return;
+      }
+
       try {
-        const response = await fetch(`http://127.0.0.1:${IDE_BRIDGE_PORT}/chat`, {
+        const response = await fetch(`${backendUrl.replace(/\/$/, '')}/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: message.text ?? '' }),

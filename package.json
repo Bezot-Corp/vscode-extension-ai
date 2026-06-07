@@ -1,7 +1,7 @@
 {
   "name": "bezotcorp-ai",
   "displayName": "BezotCorp AI",
-  "description": "Local AI coding assistant for VS Code.",
+  "description": "Configurable AI coding assistant for VS Code.",
   "version": "1.0.0",
   "publisher": "bezotcorp",
   "icon": "assets/icon.png",
@@ -29,13 +29,34 @@
     "assistant",
     "coding",
     "rust",
-    "local"
+    "local",
+    "backend",
+    "self-hosted"
   ],
   "activationEvents": [
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "BezotCorp AI",
+      "properties": {
+        "bezotcorpAi.backendMode": {
+          "type": "string",
+          "default": "custom",
+          "enum": [
+            "custom",
+            "bezotcorp"
+          ],
+          "description": "Backend mode. Use 'custom' for your own compatible backend. The official BezotCorp backend is not available yet."
+        },
+        "bezotcorpAi.backendUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:4188",
+          "description": "Custom backend URL compatible with the BezotCorp AI chat API."
+        }
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {

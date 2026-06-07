@@ -2,11 +2,11 @@
 
 ![BezotCorp AI](assets/banner.png)
 
-**Your local AI coding assistant for VS Code.**
+**A configurable AI coding assistant for VS Code.**
 
-BezotCorp AI connects VS Code to your local AI infrastructure, allowing you to chat with your codebase, inspect files, generate modifications and keep full control over your data.
+BezotCorp AI connects VS Code to AI backends, allowing you to chat with your codebase, inspect files, generate modifications and integrate your own local or remote AI infrastructure.
 
-No cloud dependency. No vendor lock-in. Your code stays on your machine.
+Use your own backend today. Connect to the official BezotCorp platform in the future.
 
 ---
 
@@ -14,11 +14,11 @@ No cloud dependency. No vendor lock-in. Your code stays on your machine.
 
 ### AI Chat
 
-Interact with your local AI directly from VS Code.
+Interact with AI directly from VS Code.
 
 - Natural language conversations
 - Context-aware responses
-- Fast local execution
+- Backend agnostic design
 
 ### Workspace Integration
 
@@ -36,13 +36,14 @@ Apply changes directly from AI responses.
 - Replace code blocks
 - Save changes automatically
 
-### Local First
+### Flexible Backends
 
-Designed for developers who want complete control.
+Choose how BezotCorp AI connects.
 
-- No external API required
-- Self-hosted infrastructure
-- Privacy-first architecture
+- Local self-hosted backend
+- Remote backend
+- Custom infrastructure
+- Future BezotCorp managed backend
 
 ---
 
@@ -55,16 +56,30 @@ Install the extension from:
 
 ---
 
-## Requirements
+## Configuration
 
-A running BezotCorp AI backend is required.
+BezotCorp AI supports multiple backend modes.
 
-Default endpoints:
+### Custom Backend
 
-| Service           | Port |
-| ----------------- | ---- |
-| VS Code Extension | 4190 |
-| IDE Bridge        | 4188 |
+Configure your own backend URL:
+
+```json
+{
+  "bezotcorpAi.backendMode": "custom",
+  "bezotcorpAi.backendUrl": "http://127.0.0.1:4188"
+}
+```
+
+### BezotCorp Backend
+
+```json
+{
+  "bezotcorpAi.backendMode": "bezotcorp"
+}
+```
+
+The hosted BezotCorp backend is planned but not available yet.
 
 ---
 
@@ -74,26 +89,26 @@ Default endpoints:
 VS Code Extension
         │
         ▼
-   IDE Bridge
+  Configurable Backend
         │
-        ▼
-  BezotCorp AI
-        │
-        ▼
- Local Models
+        ├── Local Backend
+        ├── Remote Backend
+        └── Future BezotCorp Backend
 ```
 
-The extension acts as a lightweight bridge between VS Code and the local BezotCorp AI ecosystem.
+The extension acts as a lightweight integration layer between VS Code and AI systems.
 
 ---
 
 ## Privacy
 
-BezotCorp AI is built with a local-first philosophy.
+BezotCorp AI does not require any cloud service.
 
-- Source code remains on your machine
-- No mandatory cloud services
-- No code sent to third parties
+Privacy depends on the backend you choose.
+
+- Self-hosted backend → your data stays under your control
+- Remote backend → privacy depends on your provider
+- Future BezotCorp backend → policy will be documented separately
 
 ---
 
