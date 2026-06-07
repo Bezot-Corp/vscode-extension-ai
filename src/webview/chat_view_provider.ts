@@ -9,6 +9,12 @@ type WebviewMessage = {
   type: string;
   text?: string;
   includeActiveFile?: boolean;
+  includeOpenFiles?: boolean;
+};
+
+type ContextOptions = {
+  includeActiveFile: boolean;
+  includeOpenFiles: boolean;
 };
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
@@ -33,20 +39,30 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
 
       if (message.type === 'refreshContextPreview') {
-        await this.sendContextPreview(webviewView, message.includeActiveFile ?? true);
+        await this.sendContextPreview(webviewView, this.getContextOptions(message));
         return;
       }
 
       if (message.type === 'chat') {
-        const includeActiveFile = message.includeActiveFile ?? true;
+        const contextOptions = this.getContextOptions(message);
 
-        await this.sendContextPreview(webviewView, includeActiveFile);
-        await this.sendChatMessage(webviewView, message.text ?? '', includeActiveFile);
+        await this.sendContextPreview(webviewView, contextOptions);
+        await this.sendChatMessage(webviewView, message.text ?? '', contextOptions);
       }
     });
 
     void this.testConnection(webviewView);
-    void this.sendContextPreview(webviewView, true);
+    void this.sendContextPreview(webviewView, {
+      includeActiveFile: true,
+      includeOpenFiles: false,
+    });
+  }
+
+  private getContextOptions(message: WebviewMessage): ContextOptions {
+    return {
+      includeActiveFile: message.includeActiveFile ?? true,
+      includeOpenFiles: message.includeOpenFiles ?? false,
+    };
   }
 
   private async testConnection(webviewView: vscode.WebviewView): Promise<void> {
@@ -73,15 +89,13 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   private async sendChatMessage(
     webviewView: vscode.WebviewView,
     text: string,
-    includeActiveFile: boolean,
+    contextOptions: ContextOptions,
   ): Promise<void> {
     const config = getExtensionConfig();
     const provider = createProvider(config);
 
     try {
-      const context = await buildChatContext(config.contextMode, {
-        includeActiveFile,
-      });
+      const context = await buildChatContext(config.contextMode, contextOptions);
 
       webviewView.webview.postMessage({
         type: 'contextStatus',
@@ -109,12 +123,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private async sendContextPreview(webviewView: vscode.WebviewView, includeActiveFile: boolean): Promise<void> {
+  private async sendContextPreview(webviewView: vscode.WebviewView, contextOptions: ContextOptions): Promise<void> {
     const config = getExtensionConfig();
-
-    const context = await buildChatContext(config.contextMode, {
-      includeActiveFile,
-    });
+    const context = await buildChatContext(config.contextMode, contextOptions);
 
     webviewView.webview.postMessage({
       type: 'contextPreview',

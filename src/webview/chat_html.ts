@@ -30,6 +30,12 @@ ${getChatStyles()}
     Include active file
   </label>
   <div id="active-file-status">Active file will be attached when available.</div>
+
+  <label>
+    <input id="include-open-files" type="checkbox">
+    Include open files
+  </label>
+  <div id="open-files-status">Open files disabled.</div>
 </div>
 
 <div id="context-preview-card">

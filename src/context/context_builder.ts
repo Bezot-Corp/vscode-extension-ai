@@ -8,23 +8,17 @@ const MAX_OPEN_FILES = 8;
 
 export type ContextBuildOptions = {
   includeActiveFile: boolean;
+  includeOpenFiles: boolean;
 };
 
 export async function buildChatContext(mode: ContextMode, options: ContextBuildOptions): Promise<ChatContext> {
   const activeFile = options.includeActiveFile ? getActiveFile() : undefined;
-
-  if (mode === 'basic') {
-    return {
-      mode,
-      activeFile,
-      openFiles: [],
-    };
-  }
+  const shouldIncludeOpenFiles = options.includeOpenFiles || mode === 'rich';
 
   return {
     mode,
     activeFile,
-    openFiles: getOpenFiles(activeFile?.path),
+    openFiles: shouldIncludeOpenFiles ? getOpenFiles(activeFile?.path) : [],
   };
 }
 
