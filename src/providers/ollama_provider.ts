@@ -1,12 +1,20 @@
 import { ExtensionConfig } from '../config/extension_config';
 import { ChatContext, ContextFile } from '../context/chat_context';
-import { AiProvider, ChatRequest, ChatResult, ProviderStatus } from './ai_provider';
+import { AiProvider, ChatRequest, ChatResult, ChatStreamHandler, ProviderStatus } from './ai_provider';
 
 type OllamaResponse = {
   message?: {
     content?: string;
   };
   error?: string;
+};
+
+type OllamaStreamResponse = {
+  message?: {
+    content?: string;
+  };
+  error?: string;
+  done?: boolean;
 };
 
 export class OllamaProvider implements AiProvider {
@@ -43,16 +51,7 @@ export class OllamaProvider implements AiProvider {
       body: JSON.stringify({
         model: this.config.model,
         stream: false,
-        messages: [
-          {
-            role: 'system',
-            content: buildSystemPrompt(request.context),
-          },
-          {
-            role: 'user',
-            content: request.message,
-          },
-        ],
+        messages: buildMessages(request),
       }),
     });
 
@@ -62,6 +61,86 @@ export class OllamaProvider implements AiProvider {
       text: data.message?.content ?? data.error ?? 'no response',
     };
   }
+
+  async streamChat(request: ChatRequest, handler: ChatStreamHandler): Promise<void> {
+    const response = await fetch(`${this.config.providerUrl}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: this.config.model,
+        stream: true,
+        messages: buildMessages(request),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error('Streaming response body is empty');
+    }
+
+    handler.onStart();
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+
+        if (!trimmedLine) {
+          continue;
+        }
+
+        const data = JSON.parse(trimmedLine) as OllamaStreamResponse;
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        const chunk = data.message?.content;
+
+        if (chunk) {
+          handler.onChunk(chunk);
+        }
+
+        if (data.done) {
+          handler.onEnd();
+          return;
+        }
+      }
+    }
+
+    handler.onEnd();
+  }
+}
+
+function buildMessages(request: ChatRequest) {
+  return [
+    {
+      role: 'system',
+      content: buildSystemPrompt(request.context),
+    },
+    {
+      role: 'user',
+      content: request.message,
+    },
+  ];
 }
 
 function buildSystemPrompt(context: ChatContext): string {

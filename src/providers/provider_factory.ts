@@ -26,5 +26,11 @@ export function createProvider(config: ExtensionConfig): AiProvider {
         text: 'BezotCorp hosted backend is not available yet. Please use Ollama or a custom backend for now.',
       };
     },
+
+    async streamChat(_request, handler) {
+      handler.onStart();
+      handler.onChunk('BezotCorp hosted backend is not available yet. Please use Ollama or a custom backend for now.');
+      handler.onEnd();
+    },
   };
 }
