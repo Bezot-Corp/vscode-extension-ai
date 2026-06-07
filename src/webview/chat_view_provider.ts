@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import { ChatManager } from '../chat/chat_manager';
+import { ChatStorage } from '../chat/chat_storage';
 import { getExtensionConfig } from '../config/extension_config';
 import { buildChatContext } from '../context/context_builder';
 import { createProvider } from '../providers/provider_factory';
@@ -18,7 +20,14 @@ type ContextOptions = {
 };
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
-  constructor(private readonly extensionUri: vscode.Uri) {}
+  private readonly chatManager: ChatManager;
+
+  constructor(
+    private readonly extensionUri: vscode.Uri,
+    storageUri: vscode.Uri,
+  ) {
+    this.chatManager = new ChatManager(new ChatStorage(storageUri));
+  }
 
   resolveWebviewView(webviewView: vscode.WebviewView): void {
     webviewView.webview.options = {
@@ -43,6 +52,12 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         return;
       }
 
+      if (message.type === 'clearHistory') {
+        await this.chatManager.clear();
+        webviewView.webview.postMessage({ type: 'historyRestored', messages: [] });
+        return;
+      }
+
       if (message.type === 'chat') {
         const contextOptions = this.getContextOptions(message);
 
@@ -51,8 +66,20 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
     });
 
-    void this.testConnection(webviewView);
-    void this.sendContextPreview(webviewView, {
+    void this.initialize(webviewView);
+  }
+
+  private async initialize(webviewView: vscode.WebviewView): Promise<void> {
+    await this.chatManager.load();
+
+    webviewView.webview.postMessage({
+      type: 'historyRestored',
+      messages: this.chatManager.getMessages(),
+    });
+
+    await this.testConnection(webviewView);
+
+    await this.sendContextPreview(webviewView, {
       includeActiveFile: true,
       includeOpenFiles: false,
     });
@@ -102,6 +129,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         activeFilePath: context.activeFile?.path,
       });
 
+      await this.chatManager.addMessage('user', text);
+
+      let assistantText = '';
+
       await provider.streamChat(
         {
           message: text,
@@ -114,6 +145,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             });
           },
           onChunk: (chunk: string) => {
+            assistantText += chunk;
+
             webviewView.webview.postMessage({
               type: 'responseChunk',
               text: chunk,
@@ -126,10 +159,18 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
           },
         },
       );
+
+      if (assistantText.trim()) {
+        await this.chatManager.addMessage('assistant', assistantText);
+      }
     } catch (error) {
+      const errorText = `Error: ${String(error)}`;
+
+      await this.chatManager.addMessage('assistant', errorText);
+
       webviewView.webview.postMessage({
         type: 'response',
-        text: `Error: ${String(error)}`,
+        text: errorText,
       });
 
       webviewView.webview.postMessage({

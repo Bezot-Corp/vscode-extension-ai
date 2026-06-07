@@ -26,7 +26,8 @@ body {
   line-height: 1.4;
 }
 
-#context-card {
+#context-card,
+#context-preview-card {
   padding: 10px;
   border: 1px solid var(--vscode-panel-border);
   border-radius: 6px;
@@ -42,7 +43,11 @@ body {
   gap: 6px;
 }
 
-#active-file-status {
+#active-file-status,
+#open-files-status,
+#context-mode,
+#context-preview-active-file,
+#context-preview-open-files {
   opacity: 0.8;
   font-size: 0.9em;
   word-break: break-all;
@@ -65,7 +70,8 @@ body {
 }
 
 #settings,
-#test-connection {
+#test-connection,
+#clear-history {
   padding: 5px 10px;
   background: var(--vscode-button-secondaryBackground);
   color: var(--vscode-button-secondaryForeground);
@@ -75,7 +81,8 @@ body {
 }
 
 #settings:hover,
-#test-connection:hover {
+#test-connection:hover,
+#clear-history:hover {
   background: var(--vscode-button-secondaryHoverBackground);
 }
 
@@ -148,24 +155,6 @@ body {
 #send:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-#context-preview-card {
-  padding: 10px;
-  border: 1px solid var(--vscode-panel-border);
-  border-radius: 6px;
-  background: var(--vscode-editor-background);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-#context-mode,
-#context-preview-active-file,
-#context-preview-open-files {
-  opacity: 0.8;
-  font-size: 0.9em;
-  word-break: break-all;
 }
 `;
 }

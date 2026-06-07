@@ -7,6 +7,7 @@ const input = document.getElementById('input');
 const send = document.getElementById('send');
 const settings = document.getElementById('settings');
 const testConnection = document.getElementById('test-connection');
+const clearHistory = document.getElementById('clear-history');
 const backendStatus = document.getElementById('backend-status');
 const backendUrl = document.getElementById('backend-url');
 const includeActiveFile = document.getElementById('include-active-file');
@@ -33,6 +34,19 @@ function addMessage(text, role) {
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
   return div;
+}
+
+function clearMessages() {
+  messages.textContent = '';
+  currentAssistantMessage = null;
+}
+
+function restoreHistory(restoredMessages) {
+  clearMessages();
+
+  for (const message of restoredMessages) {
+    addMessage(message.content, message.role);
+  }
 }
 
 function startAssistantMessage() {
@@ -126,6 +140,10 @@ testConnection.addEventListener('click', () => {
   vscode.postMessage({ type: 'testConnection' });
 });
 
+clearHistory.addEventListener('click', () => {
+  vscode.postMessage({ type: 'clearHistory' });
+});
+
 includeActiveFile.addEventListener('change', refreshContextPreview);
 includeOpenFiles.addEventListener('change', refreshContextPreview);
 
@@ -145,6 +163,10 @@ input.addEventListener('input', () => {
 
 window.addEventListener('message', (event) => {
   const msg = event.data;
+
+  if (msg.type === 'historyRestored') {
+    restoreHistory(msg.messages);
+  }
 
   if (msg.type === 'response') {
     addMessage(msg.text, 'assistant');

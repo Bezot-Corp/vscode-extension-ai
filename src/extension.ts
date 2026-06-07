@@ -8,7 +8,10 @@ export function activate(context: vscode.ExtensionContext) {
   const server = createBridgeServer();
 
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(CHAT_VIEW_ID, new ChatViewProvider(context.extensionUri)),
+    vscode.window.registerWebviewViewProvider(
+      CHAT_VIEW_ID,
+      new ChatViewProvider(context.extensionUri, context.globalStorageUri),
+    ),
   );
 
   context.subscriptions.push(
