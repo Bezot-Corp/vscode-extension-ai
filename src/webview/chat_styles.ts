@@ -149,5 +149,23 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+#context-preview-card {
+  padding: 10px;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+  background: var(--vscode-editor-background);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#context-mode,
+#context-preview-active-file,
+#context-preview-open-files {
+  opacity: 0.8;
+  font-size: 0.9em;
+  word-break: break-all;
+}
 `;
 }

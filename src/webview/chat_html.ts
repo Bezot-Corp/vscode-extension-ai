@@ -32,6 +32,13 @@ ${getChatStyles()}
   <div id="active-file-status">Active file will be attached when available.</div>
 </div>
 
+<div id="context-preview-card">
+  <strong>Context</strong>
+  <div id="context-mode">Mode: basic</div>
+  <div id="context-preview-active-file">Active file: none</div>
+  <div id="context-preview-open-files">Open files: 0</div>
+</div>
+
 <div id="messages"></div>
 
 <div id="input-area">
