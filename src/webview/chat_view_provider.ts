@@ -32,12 +32,21 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         return;
       }
 
+      if (message.type === 'refreshContextPreview') {
+        await this.sendContextPreview(webviewView, message.includeActiveFile ?? true);
+        return;
+      }
+
       if (message.type === 'chat') {
-        await this.sendChatMessage(webviewView, message.text ?? '', message.includeActiveFile ?? true);
+        const includeActiveFile = message.includeActiveFile ?? true;
+
+        await this.sendContextPreview(webviewView, includeActiveFile);
+        await this.sendChatMessage(webviewView, message.text ?? '', includeActiveFile);
       }
     });
 
     void this.testConnection(webviewView);
+    void this.sendContextPreview(webviewView, true);
   }
 
   private async testConnection(webviewView: vscode.WebviewView): Promise<void> {
@@ -98,5 +107,20 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         text: `Disconnected: ${String(error)}`,
       });
     }
+  }
+
+  private async sendContextPreview(webviewView: vscode.WebviewView, includeActiveFile: boolean): Promise<void> {
+    const config = getExtensionConfig();
+
+    const context = await buildChatContext(config.contextMode, {
+      includeActiveFile,
+    });
+
+    webviewView.webview.postMessage({
+      type: 'contextPreview',
+      mode: config.contextMode,
+      activeFilePath: context.activeFile?.path,
+      openFilesCount: context.openFiles.length,
+    });
   }
 }
