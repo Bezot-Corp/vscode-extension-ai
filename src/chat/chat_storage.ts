@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
-import { CHAT_STORE_VERSION, ChatStore } from './chat_store';
-import { ChatSession } from './chat_session';
+
+import { ChatMessage } from './chat_message';
+import { ChatSession, createChatSessionFromLegacy } from './chat_session';
+import { CHAT_STORE_VERSION, ChatStore, normalizeChatStore } from './chat_store';
 
 const CHAT_FILE_NAME = 'chat.json';
 
@@ -25,7 +27,7 @@ export class ChatStorage {
     await vscode.workspace.fs.createDirectory(this.storageUri);
 
     const fileUri = vscode.Uri.joinPath(this.storageUri, CHAT_FILE_NAME);
-    const content = JSON.stringify(store, null, 2);
+    const content = JSON.stringify(normalizeChatStore(store), null, 2);
     const bytes = Buffer.from(content, 'utf8');
 
     await vscode.workspace.fs.writeFile(fileUri, bytes);
@@ -34,19 +36,11 @@ export class ChatStorage {
 
 function migrateChatData(data: unknown): ChatStore | undefined {
   if (isChatStore(data)) {
-    return data;
+    return normalizeChatStore(data);
   }
 
   if (isLegacyChatSession(data)) {
-    const now = new Date().toISOString();
-
-    const migratedSession: ChatSession = {
-      id: data.id,
-      title: createTitleFromMessages(data.messages),
-      createdAt: data.messages[0]?.createdAt ?? now,
-      updatedAt: data.messages[data.messages.length - 1]?.createdAt ?? now,
-      messages: data.messages,
-    };
+    const migratedSession = createChatSessionFromLegacy(data.id, data.messages);
 
     return {
       version: CHAT_STORE_VERSION,
@@ -72,7 +66,7 @@ function isChatStore(data: unknown): data is ChatStore {
   );
 }
 
-function isLegacyChatSession(data: unknown): data is Pick<ChatSession, 'id' | 'messages'> {
+function isLegacyChatSession(data: unknown): data is { id: string; messages: ChatMessage[] } {
   if (!data || typeof data !== 'object') {
     return false;
   }
@@ -80,14 +74,4 @@ function isLegacyChatSession(data: unknown): data is Pick<ChatSession, 'id' | 'm
   const candidate = data as Partial<ChatSession>;
 
   return typeof candidate.id === 'string' && Array.isArray(candidate.messages);
-}
-
-function createTitleFromMessages(messages: ChatSession['messages']): string {
-  const firstUserMessage = messages.find((message) => message.role === 'user')?.content.trim();
-
-  if (!firstUserMessage) {
-    return 'New chat';
-  }
-
-  return firstUserMessage.length > 48 ? `${firstUserMessage.slice(0, 48)}...` : firstUserMessage;
 }
