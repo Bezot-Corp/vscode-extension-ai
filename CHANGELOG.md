@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.2.0...v1.3.0) (2026-06-08)
+
+
+### Features
+
+* improve bridge server resilience ([de51ab1](https://github.com/Bezot-Corp/vscode-extension-ai/commit/de51ab1287803f51a4a4cb9aba566e4f4bb8736e))
+
 # [1.2.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.1.0...v1.2.0) (2026-06-08)
 
 
