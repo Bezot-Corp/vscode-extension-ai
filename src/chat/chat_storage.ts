@@ -18,7 +18,8 @@ export class ChatStorage {
       const parsed = JSON.parse(content) as unknown;
 
       return migrateChatData(parsed);
-    } catch {
+    } catch (error) {
+      console.error(`Failed to load chat storage: ${error}`);
       return undefined;
     }
   }
@@ -30,7 +31,11 @@ export class ChatStorage {
     const content = JSON.stringify(normalizeChatStore(store), null, 2);
     const bytes = Buffer.from(content, 'utf8');
 
-    await vscode.workspace.fs.writeFile(fileUri, bytes);
+    try {
+      await vscode.workspace.fs.writeFile(fileUri, bytes);
+    } catch (error) {
+      console.error(`Failed to save chat storage: ${error}`);
+    }
   }
 }
 
@@ -49,6 +54,7 @@ function migrateChatData(data: unknown): ChatStore | undefined {
     };
   }
 
+  console.warn('Unknown chat data format');
   return undefined;
 }
 
