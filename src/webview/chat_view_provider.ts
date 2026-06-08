@@ -12,6 +12,7 @@ import { sendModelState, testConnection } from './model_state_presenter';
 import { sendContextPreview } from './context_preview_presenter';
 import { acceptPatch, detectAndSendPatchPreviews, rejectPatch } from './patch_preview_controller';
 import { GenerationController } from './generation_controller';
+import { getContextOptions } from './context_options_mapper';
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   private readonly chatManager: ChatManager;
@@ -71,7 +72,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
 
       if (message.type === 'refreshContextPreview') {
-        await sendContextPreview(webviewView, this.getContextOptions(message));
+        await sendContextPreview(webviewView, getContextOptions(message));
         return;
       }
 
@@ -142,7 +143,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
 
       if (message.type === 'chat') {
-        const contextOptions = this.getContextOptions(message);
+        const contextOptions = getContextOptions(message);
 
         await sendContextPreview(webviewView, contextOptions);
         await this.generationController.sendChatMessage(webviewView, message.text ?? '', contextOptions);
@@ -166,14 +167,5 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       includeSelectedText: true,
       includeWorkspaceTree: false,
     });
-  }
-
-  private getContextOptions(message: WebviewMessage): ContextOptions {
-    return {
-      includeActiveFile: message.includeActiveFile ?? true,
-      includeOpenFiles: message.includeOpenFiles ?? false,
-      includeSelectedText: message.includeSelectedText ?? true,
-      includeWorkspaceTree: message.includeWorkspaceTree ?? false,
-    };
   }
 }
