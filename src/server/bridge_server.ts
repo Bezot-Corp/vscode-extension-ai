@@ -1,11 +1,17 @@
 import * as http from 'node:http';
 
-import { VSCODE_PORT } from '../constants';
+import { MAX_BRIDGE_PORT_ATTEMPTS, VSCODE_PORT } from '../constants';
 import { handleActiveFile } from './active_file_handler';
 import { handleOpenFiles } from './open_files_handler';
 import { handlePatch } from './patch_handler';
 
-export function createBridgeServer(): http.Server {
+export type BridgeServerRuntime = {
+  server: http.Server;
+  port?: number;
+  dispose(): void;
+};
+
+export function createBridgeServer(): BridgeServerRuntime {
   const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -29,13 +35,55 @@ export function createBridgeServer(): http.Server {
     res.end(JSON.stringify({ error: 'not found' }));
   });
 
-  server.on('error', (error) => {
-    console.error('BezotCorp AI bridge server error:', error);
-  });
+  const runtime: BridgeServerRuntime = {
+    server,
+    port: undefined,
+    dispose() {
+      if (server.listening) {
+        server.close();
+      }
+    },
+  };
 
-  server.listen(VSCODE_PORT, '127.0.0.1', () => {
-    console.log(`BezotCorp AI extension listening on http://127.0.0.1:${VSCODE_PORT}`);
-  });
+  void listenOnAvailablePort(server, runtime, VSCODE_PORT, 0);
 
-  return server;
+  return runtime;
+}
+
+function listenOnAvailablePort(
+  server: http.Server,
+  runtime: BridgeServerRuntime,
+  port: number,
+  attempt: number,
+): Promise<void> {
+  return new Promise((resolve) => {
+    const onError = (error: NodeJS.ErrnoException) => {
+      server.off('listening', onListening);
+
+      if (error.code === 'EADDRINUSE' && attempt + 1 < MAX_BRIDGE_PORT_ATTEMPTS) {
+        const nextPort = port + 1;
+
+        console.warn(`BezotCorp AI bridge port ${port} is already in use. Trying ${nextPort}...`);
+
+        void listenOnAvailablePort(server, runtime, nextPort, attempt + 1).then(resolve);
+        return;
+      }
+
+      console.error('BezotCorp AI bridge server error:', error);
+      resolve();
+    };
+
+    const onListening = () => {
+      server.off('error', onError);
+      runtime.port = port;
+
+      console.log(`BezotCorp AI extension bridge listening on http://127.0.0.1:${port}`);
+
+      resolve();
+    };
+
+    server.once('error', onError);
+    server.once('listening', onListening);
+    server.listen(port, '127.0.0.1');
+  });
 }
