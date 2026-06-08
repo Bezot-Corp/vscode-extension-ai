@@ -15,6 +15,10 @@ const testConnection = document.getElementById('test-connection');
 const clearHistory = document.getElementById('clear-history');
 const backendStatus = document.getElementById('backend-status');
 const backendUrl = document.getElementById('backend-url');
+const newChat = document.getElementById('new-chat');
+const renameChat = document.getElementById('rename-chat');
+const deleteChat = document.getElementById('delete-chat');
+const chatSessionSelect = document.getElementById('chat-session-select');
 const includeSelectedText = document.getElementById('include-selected-text');
 const includeActiveFile = document.getElementById('include-active-file');
 const includeOpenFiles = document.getElementById('include-open-files');
@@ -29,6 +33,9 @@ const contextPreviewActiveFile = document.getElementById('context-preview-active
 const contextPreviewOpenFiles = document.getElementById('context-preview-open-files');
 const contextPreviewWorkspaceFiles = document.getElementById('context-preview-workspace-files');
 const patchPreviewContainer = document.getElementById('patch-preview-container');
+
+let activeSessionId = undefined;
+let chatSessions = [];
 
 ${getMessageListScript()}
 
@@ -55,6 +62,25 @@ function sendMessage() {
   });
 }
 
+function renderChatSessions(sessions, nextActiveSessionId) {
+  chatSessions = sessions;
+  activeSessionId = nextActiveSessionId;
+  chatSessionSelect.textContent = '';
+
+  for (const session of sessions) {
+    const option = document.createElement('option');
+    option.value = session.id;
+    option.textContent = session.title + ' (' + session.messageCount + ')';
+    option.selected = session.id === activeSessionId;
+
+    chatSessionSelect.appendChild(option);
+  }
+}
+
+function getActiveSession() {
+  return chatSessions.find((session) => session.id === activeSessionId);
+}
+
 function updateBackendStatus(status, text, url) {
   const icons = {
     connected: '🟢',
@@ -72,6 +98,56 @@ settings.addEventListener('click', () => {
 
 testConnection.addEventListener('click', () => {
   vscode.postMessage({ type: 'testConnection' });
+});
+
+newChat.addEventListener('click', () => {
+  vscode.postMessage({ type: 'newChat' });
+});
+
+chatSessionSelect.addEventListener('change', () => {
+  vscode.postMessage({
+    type: 'switchChatSession',
+    sessionId: chatSessionSelect.value,
+  });
+});
+
+renameChat.addEventListener('click', () => {
+  const session = getActiveSession();
+
+  if (!session) {
+    return;
+  }
+
+  const title = prompt('Rename chat', session.title);
+
+  if (!title || !title.trim()) {
+    return;
+  }
+
+  vscode.postMessage({
+    type: 'renameChatSession',
+    sessionId: session.id,
+    title: title.trim(),
+  });
+});
+
+deleteChat.addEventListener('click', () => {
+  const session = getActiveSession();
+
+  if (!session) {
+    return;
+  }
+
+  const confirmed = confirm('Delete this chat?');
+
+  if (!confirmed) {
+    return;
+  }
+
+  vscode.postMessage({
+    type: 'deleteChatSession',
+    sessionId: session.id,
+  });
 });
 
 clearHistory.addEventListener('click', () => {
@@ -103,6 +179,11 @@ input.addEventListener('input', () => {
 
 window.addEventListener('message', (event) => {
   const msg = event.data;
+
+  if (msg.type === 'chatStoreRestored') {
+    renderChatSessions(msg.sessions, msg.activeSessionId);
+    restoreHistory(msg.messages);
+  }
 
   if (msg.type === 'historyRestored') {
     restoreHistory(msg.messages);
