@@ -4,6 +4,9 @@ import { ChatMessage, ChatRole, cloneChatMessage, createChatMessage } from './ch
 
 export const DEFAULT_CHAT_TITLE = 'New chat';
 
+/**
+ * Represents a chat session.
+ */
 export type ChatSession = {
   id: string;
   title: string;
@@ -12,8 +15,17 @@ export type ChatSession = {
   messages: ChatMessage[];
 };
 
+/**
+ * Creates a new chat session with an optional title.
+ * @param title - The title of the chat session. Defaults to 'New chat'.
+ * @returns A new chat session.
+ */
 export function createChatSession(title = DEFAULT_CHAT_TITLE): ChatSession {
   const now = new Date().toISOString();
+
+  if (!title) {
+    throw new Error('Title cannot be empty');
+  }
 
   return {
     id: randomUUID(),
@@ -24,8 +36,18 @@ export function createChatSession(title = DEFAULT_CHAT_TITLE): ChatSession {
   };
 }
 
+/**
+ * Creates a chat session from legacy data.
+ * @param id - The ID of the chat session.
+ * @param messages - An array of chat messages.
+ * @returns A chat session created from the legacy data.
+ */
 export function createChatSessionFromLegacy(id: string, messages: ChatMessage[]): ChatSession {
   const now = new Date().toISOString();
+
+  if (!id || !messages || !Array.isArray(messages)) {
+    throw new Error('Invalid input');
+  }
 
   return {
     id,
@@ -36,6 +58,11 @@ export function createChatSessionFromLegacy(id: string, messages: ChatMessage[])
   };
 }
 
+/**
+ * Clones a chat session.
+ * @param session - The chat session to clone.
+ * @returns A cloned chat session.
+ */
 export function cloneChatSession(session: ChatSession): ChatSession {
   return {
     ...session,
@@ -43,6 +70,12 @@ export function cloneChatSession(session: ChatSession): ChatSession {
   };
 }
 
+/**
+ * Adds a message to a chat session and updates the title if necessary.
+ * @param session - The chat session.
+ * @param role - The role of the message (e.g., 'user', 'assistant').
+ * @param content - The content of the message.
+ */
 export function addMessageToChatSession(session: ChatSession, role: ChatRole, content: string): void {
   const message = createChatMessage(role, content);
 
@@ -54,12 +87,21 @@ export function addMessageToChatSession(session: ChatSession, role: ChatRole, co
   }
 }
 
+/**
+ * Clears all messages and resets the title of a chat session.
+ * @param session - The chat session to clear.
+ */
 export function clearChatSession(session: ChatSession): void {
   session.title = DEFAULT_CHAT_TITLE;
   session.messages = [];
   session.updatedAt = new Date().toISOString();
 }
 
+/**
+ * Renames a chat session if the new title is not empty.
+ * @param session - The chat session.
+ * @param title - The new title of the chat session.
+ */
 export function renameChatSession(session: ChatSession, title: string): void {
   const cleanTitle = title.trim();
 
@@ -71,6 +113,11 @@ export function renameChatSession(session: ChatSession, title: string): void {
   session.updatedAt = new Date().toISOString();
 }
 
+/**
+ * Normalizes a chat session by ensuring all properties are valid.
+ * @param session - The chat session to normalize.
+ * @returns A normalized chat session.
+ */
 export function normalizeChatSession(session: ChatSession): ChatSession {
   return {
     id: session.id || randomUUID(),
@@ -81,12 +128,22 @@ export function normalizeChatSession(session: ChatSession): ChatSession {
   };
 }
 
+/**
+ * Creates a chat title from an array of messages.
+ * @param messages - An array of chat messages.
+ * @returns A chat title based on the first user message.
+ */
 function createChatTitleFromMessages(messages: ChatMessage[]): string {
   const firstUserMessage = messages.find((message) => message.role === 'user')?.content;
 
   return createChatTitleFromMessage(firstUserMessage ?? '');
 }
 
+/**
+ * Creates a chat title from a single message.
+ * @param message - The content of the message.
+ * @returns A chat title based on the message content.
+ */
 function createChatTitleFromMessage(message: string): string {
   const clean = message.trim().replace(/\s+/g, ' ');
 

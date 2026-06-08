@@ -48,8 +48,9 @@ export function normalizeChatStore(store: ChatStore): ChatStore {
   };
 }
 
-export function getActiveChatSession(store: ChatStore): ChatSession {
-  return ensureActiveChatSession(store);
+export function getActiveChatSession(store: ChatStore): ChatSession | undefined {
+  const session = store.sessions.find((candidate) => candidate.id === store.activeSessionId);
+  return session ?? ensureActiveChatSession(store);
 }
 
 export function createAndActivateChatSession(store: ChatStore, title?: string): ChatSession {
@@ -64,11 +65,9 @@ export function createAndActivateChatSession(store: ChatStore, title?: string): 
 export function setActiveChatSession(store: ChatStore, sessionId: string): ChatSession | undefined {
   const session = store.sessions.find((candidate) => candidate.id === sessionId);
 
-  if (!session) {
-    return undefined;
+  if (session) {
+    store.activeSessionId = session.id;
   }
-
-  store.activeSessionId = session.id;
 
   return session;
 }
@@ -76,11 +75,9 @@ export function setActiveChatSession(store: ChatStore, sessionId: string): ChatS
 export function renameChatSessionById(store: ChatStore, sessionId: string, title: string): void {
   const session = store.sessions.find((candidate) => candidate.id === sessionId);
 
-  if (!session) {
-    return;
+  if (session) {
+    renameChatSession(session, title);
   }
-
-  renameChatSession(session, title);
 }
 
 export function deleteChatSessionById(store: ChatStore, sessionId: string): void {
@@ -91,16 +88,14 @@ export function deleteChatSessionById(store: ChatStore, sessionId: string): void
 
     store.sessions = [session];
     store.activeSessionId = session.id;
-    return;
-  }
-
-  if (store.activeSessionId === sessionId) {
+  } else if (store.activeSessionId === sessionId) {
     store.activeSessionId = store.sessions[0].id;
   }
 }
 
 export function clearActiveChatSession(store: ChatStore): void {
-  clearChatSession(ensureActiveChatSession(store));
+  const session = ensureActiveChatSession(store);
+  clearChatSession(session);
 }
 
 function ensureActiveChatSession(store: ChatStore): ChatSession {
