@@ -2,7 +2,7 @@
 
 ![BezotCorp AI](assets/banner.png)
 
-**A configurable AI coding assistant for VS Code.**
+**A configurable, local-first AI coding assistant for VS Code.**
 
 BezotCorp AI connects VS Code to local or remote AI providers and gives AI assistants access to your workspace context directly inside VS Code.
 
@@ -17,11 +17,27 @@ Use Ollama today, connect your own backend, or integrate future BezotCorp servic
 Chat directly with AI inside VS Code.
 
 - Streaming responses
-- Persistent chat history
 - Stop generation support
 - Context-aware conversations
+- Multiple chat sessions
+- Persistent session storage
+- Session switching
+- Session rename
+- Session deletion
 - Provider abstraction
 - Backend health monitoring
+
+### Model Management
+
+Choose and manage the model used by the assistant.
+
+- Active model display
+- Model selector
+- Manual model entry
+- Ollama model discovery
+- Model refresh
+- Persisted model selection
+- Custom backend model support
 
 ### Workspace Context
 
@@ -31,8 +47,20 @@ Provide useful context to the AI.
 - Active file support
 - Open files support
 - Workspace tree support
-- Rich workspace context
+- Basic context mode
+- Rich workspace context mode
 - Context preview before requests
+
+### Patch Workflow
+
+Review and apply AI-generated code changes.
+
+- Patch detection from AI responses
+- Patch preview cards
+- Diff rendering
+- Accept patch
+- Reject patch
+- Workspace edit application
 
 ### AI Providers
 
@@ -57,7 +85,8 @@ Early foundations for agent-style workflows.
 - Tool registry foundation
 - Selected text tool foundation
 - Workspace tree tool foundation
-- Patch preview foundation
+- Patch workflow foundation
+- Model management foundation
 
 ### Local First
 
@@ -96,7 +125,8 @@ Install the extension from:
 ```json
 {
   "bezotcorpAi.provider": "customBackend",
-  "bezotcorpAi.providerUrl": "http://127.0.0.1:4188"
+  "bezotcorpAi.providerUrl": "http://127.0.0.1:4188",
+  "bezotcorpAi.model": "custom-model"
 }
 ```
 
@@ -137,8 +167,10 @@ BezotCorp AI: Open Settings
 VS Code Extension
         │
         ├── Chat UI
+        ├── Chat Sessions
         ├── Context Builder
-        ├── History Storage
+        ├── Model Management
+        ├── Patch Engine
         ├── Tool Foundations
         └── AI Provider
                 │
@@ -147,7 +179,7 @@ VS Code Extension
                 └── Future BezotCorp Backend
 ```
 
-The extension manages context collection, provider integration, history persistence and streaming responses directly inside VS Code.
+The extension manages context collection, model selection, provider integration, chat sessions, patch workflows and streaming responses directly inside VS Code.
 
 ---
 
@@ -179,13 +211,28 @@ Privacy depends on the provider you choose.
 
 - AI chat
 - Streaming responses
-- Persistent chat history
 - Stop generation
+- Multiple chat sessions
+- Persistent session storage
+- Session switching
+- Session rename
+- Session deletion
+- Active model display
+- Model selector
+- Manual model entry
+- Ollama model discovery
+- Model refresh
+- Persisted model selection
 - Selected text context
 - Active file context
 - Open files context
 - Workspace tree context
 - Context preview
+- Patch detection
+- Patch diff rendering
+- Patch preview UI
+- Patch accept/reject workflow
+- Workspace edit application
 - Backend status monitoring
 - Connection testing
 - Ollama integration
@@ -194,18 +241,16 @@ Privacy depends on the provider you choose.
 - Tool registry foundation
 - Selected text tool foundation
 - Workspace tree tool foundation
-- Patch preview foundation
 
 ### Planned
 
-- Patch preview UI
-- Patch apply/reject workflow
 - Multi-file editing
 - Workspace semantic graph
 - Tool calling execution
 - Agent orchestration
 - Memory integration
 - Provider profiles
+- Model capability profiles
 
 ### Future
 

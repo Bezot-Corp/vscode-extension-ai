@@ -1,5 +1,6 @@
-import { getChatScript } from './chat_script';
-import { getChatStyles } from './chat_styles';
+import { getChatScript } from '../javascript/chat_script';
+import { getChatStyles } from '../css/chat_styles';
+import { getModelManagementHtml } from './model_management_html';
 
 export function getChatHtml(): string {
   return `<!DOCTYPE html>
@@ -23,7 +24,7 @@ ${getChatStyles()}
     <button id="settings">Open Settings</button>
   </div>
 </div>
-
+${getModelManagementHtml()}
 <div id="chat-session-card">
   <div id="chat-session-header">
     <strong>Chats</strong>

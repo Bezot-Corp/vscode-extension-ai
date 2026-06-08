@@ -1,6 +1,7 @@
 import { getContextPreviewScript } from './context_preview_script';
 import { getMessageListScript } from './message_list_script';
-import { getPatchPreviewScript } from './patch_preview_script';
+import { getPatchPreviewScript } from '../patch_preview_script';
+import { getModelManagementScript } from './model_management_script';
 
 export function getChatScript(): string {
   return `
@@ -42,6 +43,8 @@ ${getMessageListScript()}
 ${getContextPreviewScript()}
 
 ${getPatchPreviewScript()}
+
+${getModelManagementScript()}
 
 function sendMessage() {
   const text = input.value.trim();
