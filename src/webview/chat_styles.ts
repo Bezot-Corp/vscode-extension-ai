@@ -180,6 +180,18 @@ body {
   gap: 8px;
 }
 
+.patch-preview-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.patch-preview-status {
+  opacity: 0.85;
+  font-size: 0.9em;
+}
+
 .patch-preview-file,
 .patch-preview-label {
   opacity: 0.85;
@@ -191,7 +203,7 @@ body {
   font-weight: 600;
 }
 
-.patch-preview-code {
+.patch-preview-diff {
   padding: 8px;
   border-radius: 4px;
   background: var(--vscode-textCodeBlock-background);
@@ -201,6 +213,32 @@ body {
   word-break: break-word;
   font-family: var(--vscode-editor-font-family);
   font-size: var(--vscode-editor-font-size);
+  line-height: 1.45;
+}
+
+.patch-diff-line {
+  display: block;
+}
+
+.patch-diff-line-unchanged {
+  opacity: 0.9;
+}
+
+.patch-diff-line-removed {
+  background: var(--vscode-diffEditor-removedTextBackground);
+}
+
+.patch-diff-line-added {
+  background: var(--vscode-diffEditor-insertedTextBackground);
+}
+
+.patch-preview-error {
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--vscode-inputValidation-errorBackground);
+  color: var(--vscode-inputValidation-errorForeground);
+  border: 1px solid var(--vscode-inputValidation-errorBorder);
+  font-size: 0.9em;
 }
 
 .patch-preview-actions {
@@ -221,24 +259,6 @@ body {
 .patch-preview-actions button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.patch-preview-actions span {
-  opacity: 0.75;
-  font-size: 0.9em;
-}
-  .patch-preview-status {
-  opacity: 0.85;
-  font-size: 0.9em;
-}
-
-.patch-preview-error {
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--vscode-inputValidation-errorBackground);
-  color: var(--vscode-inputValidation-errorForeground);
-  border: 1px solid var(--vscode-inputValidation-errorBorder);
-  font-size: 0.9em;
 }
 
 .patch-preview-accepted {

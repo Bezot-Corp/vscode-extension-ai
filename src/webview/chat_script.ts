@@ -157,6 +157,9 @@ function createPatchPreviewCard(preview) {
   card.className = 'patch-preview-card';
   card.dataset.patchId = preview.candidate.id;
 
+  const header = document.createElement('div');
+  header.className = 'patch-preview-header';
+
   const title = document.createElement('strong');
   title.textContent = 'Patch Preview';
 
@@ -164,25 +167,23 @@ function createPatchPreviewCard(preview) {
   status.className = 'patch-preview-status';
   status.textContent = 'Status: ' + preview.status;
 
+  header.appendChild(title);
+  header.appendChild(status);
+
   const file = document.createElement('div');
   file.className = 'patch-preview-file';
-  file.textContent = 'File: ' + preview.candidate.path;
+  file.textContent = preview.candidate.path;
 
-  const oldLabel = document.createElement('div');
-  oldLabel.className = 'patch-preview-label';
-  oldLabel.textContent = 'Old';
+  const diffLabel = document.createElement('div');
+  diffLabel.className = 'patch-preview-label';
+  diffLabel.textContent = 'Diff';
 
-  const oldCode = document.createElement('pre');
-  oldCode.className = 'patch-preview-code';
-  oldCode.textContent = preview.candidate.oldText;
+  const diff = document.createElement('pre');
+  diff.className = 'patch-preview-diff';
 
-  const newLabel = document.createElement('div');
-  newLabel.className = 'patch-preview-label';
-  newLabel.textContent = 'New';
-
-  const newCode = document.createElement('pre');
-  newCode.className = 'patch-preview-code';
-  newCode.textContent = preview.candidate.newText;
+  for (const line of buildDiffLines(preview.candidate.oldText, preview.candidate.newText)) {
+    diff.appendChild(createDiffLine(line));
+  }
 
   const error = document.createElement('div');
   error.className = 'patch-preview-error';
@@ -220,19 +221,99 @@ function createPatchPreviewCard(preview) {
   actions.appendChild(accept);
   actions.appendChild(reject);
 
-  card.appendChild(title);
-  card.appendChild(status);
+  card.appendChild(header);
   card.appendChild(file);
-  card.appendChild(oldLabel);
-  card.appendChild(oldCode);
-  card.appendChild(newLabel);
-  card.appendChild(newCode);
+  card.appendChild(diffLabel);
+  card.appendChild(diff);
   card.appendChild(error);
   card.appendChild(actions);
 
   updatePatchCardStatus(card, preview.status);
 
   return card;
+}
+
+function buildDiffLines(oldText, newText) {
+  const oldLines = oldText.split('\\n');
+  const newLines = newText.split('\\n');
+
+  if (oldText === newText) {
+    return oldLines.map((content) => ({
+      kind: 'unchanged',
+      content,
+    }));
+  }
+
+  const commonPrefixLength = getCommonPrefixLength(oldLines, newLines);
+  const commonSuffixLength = getCommonSuffixLength(oldLines, newLines, commonPrefixLength);
+
+  const prefix = oldLines.slice(0, commonPrefixLength).map((content) => ({
+    kind: 'unchanged',
+    content,
+  }));
+
+  const removed = oldLines
+    .slice(commonPrefixLength, oldLines.length - commonSuffixLength)
+    .map((content) => ({
+      kind: 'removed',
+      content,
+    }));
+
+  const added = newLines
+    .slice(commonPrefixLength, newLines.length - commonSuffixLength)
+    .map((content) => ({
+      kind: 'added',
+      content,
+    }));
+
+  const suffix = oldLines.slice(oldLines.length - commonSuffixLength).map((content) => ({
+    kind: 'unchanged',
+    content,
+  }));
+
+  return [...prefix, ...removed, ...added, ...suffix];
+}
+
+function getCommonPrefixLength(oldLines, newLines) {
+  const maxLength = Math.min(oldLines.length, newLines.length);
+
+  for (let index = 0; index < maxLength; index += 1) {
+    if (oldLines[index] !== newLines[index]) {
+      return index;
+    }
+  }
+
+  return maxLength;
+}
+
+function getCommonSuffixLength(oldLines, newLines, prefixLength) {
+  const maxLength = Math.min(oldLines.length, newLines.length) - prefixLength;
+
+  for (let index = 0; index < maxLength; index += 1) {
+    const oldLine = oldLines[oldLines.length - 1 - index];
+    const newLine = newLines[newLines.length - 1 - index];
+
+    if (oldLine !== newLine) {
+      return index;
+    }
+  }
+
+  return maxLength;
+}
+
+function createDiffLine(line) {
+  const span = document.createElement('span');
+  span.className = 'patch-diff-line patch-diff-line-' + line.kind;
+
+  const prefix = {
+    unchanged: '  ',
+    removed: '- ',
+    added: '+ ',
+  }[line.kind];
+
+  span.textContent = prefix + line.content + '\\n';
+
+  return span;
 }
 
 function setPatchCardBusy(card, isBusy) {
