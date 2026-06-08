@@ -4,11 +4,12 @@ import { ChatManager } from '../chat/chat_manager';
 import { ChatStorage } from '../chat/chat_storage';
 import { getExtensionConfig } from '../config/extension_config';
 import { buildChatContext } from '../context/context_builder';
+import { ModelManager } from '../models/model_manager';
 import { applyPatchCandidate } from '../patch/patch_applier';
 import { detectPatchPreviews } from '../patch/patch_detector';
 import { PatchPreview } from '../patch/patch_preview';
 import { createProvider } from '../providers/provider_factory';
-import { getChatHtml } from './chat_html';
+import { getChatHtml } from './html/chat_html';
 
 type WebviewMessage = {
   type: string;
@@ -16,6 +17,7 @@ type WebviewMessage = {
   patchId?: string;
   sessionId?: string;
   title?: string;
+  model?: string;
   includeActiveFile?: boolean;
   includeOpenFiles?: boolean;
   includeSelectedText?: boolean;
@@ -31,6 +33,7 @@ type ContextOptions = {
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   private readonly chatManager: ChatManager;
+  private readonly modelManager = new ModelManager();
   private readonly patchPreviews = new Map<string, PatchPreview>();
   private currentAbortController: AbortController | undefined;
 
@@ -56,6 +59,21 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
       if (message.type === 'testConnection') {
         await this.testConnection(webviewView);
+        await this.sendModelState(webviewView);
+        return;
+      }
+
+      if (message.type === 'refreshModels') {
+        await this.sendModelState(webviewView);
+        return;
+      }
+
+      if (message.type === 'changeModel') {
+        if (message.model) {
+          await this.modelManager.setActiveModel(message.model);
+          await this.sendModelState(webviewView);
+        }
+
         return;
       }
 
@@ -147,6 +165,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     this.sendChatStore(webviewView);
 
     await this.testConnection(webviewView);
+    await this.sendModelState(webviewView);
 
     await this.sendContextPreview(webviewView, {
       includeActiveFile: true,
@@ -171,6 +190,15 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         messageCount: session.messages.length,
       })),
       messages: activeSession.messages,
+    });
+  }
+
+  private async sendModelState(webviewView: vscode.WebviewView): Promise<void> {
+    const state = await this.modelManager.getState();
+
+    webviewView.webview.postMessage({
+      type: 'modelState',
+      ...state,
     });
   }
 
