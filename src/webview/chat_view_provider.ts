@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-
 import { ChatManager } from '../chat/chat_manager';
 import { ChatStorage } from '../chat/chat_storage';
 import { getExtensionConfig } from '../config/extension_config';
 import { buildChatContext } from '../context/context_builder';
 import { createProvider } from '../providers/provider_factory';
 import { getChatHtml } from './chat_html';
+import { detectPatchPreviews } from '../patch/patch_detector';
 
 type WebviewMessage = {
   type: string;
@@ -185,6 +185,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
       if (assistantText.trim()) {
         await this.chatManager.addMessage('assistant', assistantText);
+
+        const patchPreviews = detectPatchPreviews(assistantText);
+        if (patchPreviews.length > 0) {
+          webviewView.webview.postMessage({
+            type: 'patchPreviews',
+            previews: patchPreviews,
+          });
+        }
       }
     } catch (error) {
       if (abortController.signal.aborted) {
