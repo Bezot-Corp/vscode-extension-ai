@@ -1,6 +1,8 @@
 import { ExtensionConfig } from '../config/extension_config';
-import { ChatContext, ContextFile, ContextSelection } from '../context/chat_context';
-import { AiProvider, ChatRequest, ChatResult, ChatStreamHandler, ProviderStatus } from './ai_provider';
+import { ContextFile, ContextSelection } from '../context';
+import { ChatContext } from '../context/chat_context';
+import { AiProvider, ChatRequest, ChatResult, ChatStreamHandler } from './ai_provider';
+import { ProviderStatus } from './provider_status';
 
 type OllamaResponse = {
   message?: {

@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 
 import { ContextMode } from '../config/extension_config';
-import { ChatContext, ContextFile, ContextSelection } from './chat_context';
+import { ChatContext, ContextFile, ContextSelection } from '.';
 
 const MAX_FILE_CHARS = 40_000;
 const MAX_OPEN_FILES = 8;
 const MAX_WORKSPACE_FILES = 200;
 
-export type ContextBuildOptions = {
+type ContextBuildOptions = {
   includeActiveFile: boolean;
   includeOpenFiles: boolean;
   includeSelectedText: boolean;

@@ -1,6 +1,4 @@
-import { buildDiffLines } from './diff_builder';
-import { PatchPreview } from './patch_preview';
-import { parsePatchCandidates } from './patch_parser';
+import { buildDiffLines, parsePatchCandidates, PatchPreview } from '.';
 
 export function detectPatchPreviews(text: string): PatchPreview[] {
   return parsePatchCandidates(text).map((candidate) => ({

@@ -1,12 +1,6 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-
-import { PatchCandidate } from './patch_candidate';
-
-export type PatchApplyResult = {
-  success: boolean;
-  error?: string;
-};
+import { PatchApplyResult, PatchCandidate } from '.';
 
 export async function applyPatchCandidate(candidate: PatchCandidate): Promise<PatchApplyResult> {
   const uri = resolvePatchUri(candidate.path);

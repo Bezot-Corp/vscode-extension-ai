@@ -1,10 +1,5 @@
 import { ChatContext } from '../context/chat_context';
-
-export type ProviderStatus = {
-  status: 'connected' | 'disconnected' | 'connecting';
-  text: string;
-  providerUrl: string;
-};
+import { ProviderStatus } from './provider_status';
 
 export type ChatRequest = {
   message: string;
