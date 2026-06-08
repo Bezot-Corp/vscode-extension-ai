@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.1.0...v1.2.0) (2026-06-08)
+
+
+### Features
+
+* add patch preview UI ([5b9d07a](https://github.com/Bezot-Corp/vscode-extension-ai/commit/5b9d07a5a3e10d905b0f84680827d7755c6ab398))
+
 # [1.1.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.0.0...v1.1.0) (2026-06-08)
 
 
