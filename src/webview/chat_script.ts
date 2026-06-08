@@ -49,6 +49,7 @@ function addMessage(text, role) {
 function clearMessages() {
   messages.textContent = '';
   currentAssistantMessage = null;
+  patchPreviewContainer.textContent = '';
 }
 
 function restoreHistory(restoredMessages) {
@@ -147,60 +148,132 @@ function renderPatchPreviews(previews) {
   patchPreviewContainer.textContent = '';
 
   for (const preview of previews) {
-    const card = document.createElement('div');
-    card.className = 'patch-preview-card';
-
-    const title = document.createElement('strong');
-    title.textContent = 'Patch Preview';
-
-    const file = document.createElement('div');
-    file.className = 'patch-preview-file';
-    file.textContent = 'File: ' + preview.candidate.path;
-
-    const oldLabel = document.createElement('div');
-    oldLabel.className = 'patch-preview-label';
-    oldLabel.textContent = 'Old';
-
-    const oldCode = document.createElement('pre');
-    oldCode.className = 'patch-preview-code';
-    oldCode.textContent = preview.candidate.oldText;
-
-    const newLabel = document.createElement('div');
-    newLabel.className = 'patch-preview-label';
-    newLabel.textContent = 'New';
-
-    const newCode = document.createElement('pre');
-    newCode.className = 'patch-preview-code';
-    newCode.textContent = preview.candidate.newText;
-
-    const actions = document.createElement('div');
-    actions.className = 'patch-preview-actions';
-
-    const accept = document.createElement('button');
-    accept.textContent = 'Accept';
-    accept.disabled = true;
-
-    const reject = document.createElement('button');
-    reject.textContent = 'Reject';
-    reject.disabled = true;
-
-    const hint = document.createElement('span');
-    hint.textContent = 'Apply / reject coming soon';
-
-    actions.appendChild(accept);
-    actions.appendChild(reject);
-    actions.appendChild(hint);
-
-    card.appendChild(title);
-    card.appendChild(file);
-    card.appendChild(oldLabel);
-    card.appendChild(oldCode);
-    card.appendChild(newLabel);
-    card.appendChild(newCode);
-    card.appendChild(actions);
-
-    patchPreviewContainer.appendChild(card);
+    patchPreviewContainer.appendChild(createPatchPreviewCard(preview));
   }
+}
+
+function createPatchPreviewCard(preview) {
+  const card = document.createElement('div');
+  card.className = 'patch-preview-card';
+  card.dataset.patchId = preview.candidate.id;
+
+  const title = document.createElement('strong');
+  title.textContent = 'Patch Preview';
+
+  const status = document.createElement('div');
+  status.className = 'patch-preview-status';
+  status.textContent = 'Status: ' + preview.status;
+
+  const file = document.createElement('div');
+  file.className = 'patch-preview-file';
+  file.textContent = 'File: ' + preview.candidate.path;
+
+  const oldLabel = document.createElement('div');
+  oldLabel.className = 'patch-preview-label';
+  oldLabel.textContent = 'Old';
+
+  const oldCode = document.createElement('pre');
+  oldCode.className = 'patch-preview-code';
+  oldCode.textContent = preview.candidate.oldText;
+
+  const newLabel = document.createElement('div');
+  newLabel.className = 'patch-preview-label';
+  newLabel.textContent = 'New';
+
+  const newCode = document.createElement('pre');
+  newCode.className = 'patch-preview-code';
+  newCode.textContent = preview.candidate.newText;
+
+  const error = document.createElement('div');
+  error.className = 'patch-preview-error';
+  error.hidden = true;
+
+  const actions = document.createElement('div');
+  actions.className = 'patch-preview-actions';
+
+  const accept = document.createElement('button');
+  accept.textContent = 'Accept';
+  accept.dataset.action = 'accept';
+
+  const reject = document.createElement('button');
+  reject.textContent = 'Reject';
+  reject.dataset.action = 'reject';
+
+  accept.addEventListener('click', () => {
+    setPatchCardBusy(card, true);
+
+    vscode.postMessage({
+      type: 'acceptPatch',
+      patchId: preview.candidate.id,
+    });
+  });
+
+  reject.addEventListener('click', () => {
+    setPatchCardBusy(card, true);
+
+    vscode.postMessage({
+      type: 'rejectPatch',
+      patchId: preview.candidate.id,
+    });
+  });
+
+  actions.appendChild(accept);
+  actions.appendChild(reject);
+
+  card.appendChild(title);
+  card.appendChild(status);
+  card.appendChild(file);
+  card.appendChild(oldLabel);
+  card.appendChild(oldCode);
+  card.appendChild(newLabel);
+  card.appendChild(newCode);
+  card.appendChild(error);
+  card.appendChild(actions);
+
+  updatePatchCardStatus(card, preview.status);
+
+  return card;
+}
+
+function setPatchCardBusy(card, isBusy) {
+  const buttons = card.querySelectorAll('button');
+
+  for (const button of buttons) {
+    button.disabled = isBusy;
+  }
+}
+
+function updatePatchCardStatus(card, status, errorText) {
+  const statusElement = card.querySelector('.patch-preview-status');
+  const errorElement = card.querySelector('.patch-preview-error');
+  const buttons = card.querySelectorAll('button');
+
+  statusElement.textContent = 'Status: ' + status;
+
+  if (errorText) {
+    errorElement.hidden = false;
+    errorElement.textContent = errorText;
+  } else {
+    errorElement.hidden = true;
+    errorElement.textContent = '';
+  }
+
+  for (const button of buttons) {
+    button.disabled = status !== 'pending';
+  }
+
+  card.classList.toggle('patch-preview-accepted', status === 'accepted');
+  card.classList.toggle('patch-preview-rejected', status === 'rejected');
+}
+
+function updatePatchStatus(patchId, status, errorText) {
+  const card = patchPreviewContainer.querySelector('[data-patch-id="' + patchId + '"]');
+
+  if (!card) {
+    return;
+  }
+
+  updatePatchCardStatus(card, status, errorText);
 }
 
 function updateContextPreview(mode, activeFilePath, selectedTextLength, openFilesCount, workspaceFilesCount) {
@@ -295,8 +368,12 @@ window.addEventListener('message', (event) => {
   }
 
   if (msg.type === 'patchPreviews') {
-  renderPatchPreviews(msg.previews);
-}
+    renderPatchPreviews(msg.previews);
+  }
+
+  if (msg.type === 'patchStatus') {
+    updatePatchStatus(msg.patchId, msg.status, msg.error);
+  }
 
   if (msg.type === 'contextPreview') {
     updateContextPreview(
