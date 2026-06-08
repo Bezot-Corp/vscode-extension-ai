@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 
 import { ChatManager } from '../chat/chat_manager';
 import { ChatStorage } from '../chat/chat_storage';
-import { buildChatContext } from '../context/context_builder';
 import { ModelManager } from '../models/model_manager';
 import { PatchPreview } from '../patch/patch_preview';
 import { getChatHtml } from './html/chat_html';
@@ -10,22 +9,22 @@ import { ContextOptions } from './context_options';
 import { WebviewMessage } from '.';
 import { sendChatStore } from './chat_store_presenter';
 import { sendModelState, testConnection } from './model_state_presenter';
-import { getExtensionConfig } from '../config/extension_config';
-import { createProvider } from '../providers/provider_factory';
 import { sendContextPreview } from './context_preview_presenter';
 import { acceptPatch, detectAndSendPatchPreviews, rejectPatch } from './patch_preview_controller';
+import { GenerationController } from './generation_controller';
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   private readonly chatManager: ChatManager;
   private readonly modelManager = new ModelManager();
   private readonly patchPreviews = new Map<string, PatchPreview>();
-  private currentAbortController: AbortController | undefined;
+  private readonly generationController: GenerationController;
 
   constructor(
     private readonly extensionUri: vscode.Uri,
     storageUri: vscode.Uri,
   ) {
     this.chatManager = new ChatManager(new ChatStorage(storageUri));
+    this.generationController = new GenerationController(this.chatManager, this.patchPreviews);
   }
 
   resolveWebviewView(webviewView: vscode.WebviewView): void {
@@ -128,7 +127,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
 
       if (message.type === 'stopGeneration') {
-        this.stopGeneration();
+        this.generationController.stopGeneration();
         return;
       }
 
@@ -146,7 +145,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         const contextOptions = this.getContextOptions(message);
 
         await sendContextPreview(webviewView, contextOptions);
-        await this.sendChatMessage(webviewView, message.text ?? '', contextOptions);
+        await this.generationController.sendChatMessage(webviewView, message.text ?? '', contextOptions);
       }
     });
 
@@ -176,104 +175,5 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       includeSelectedText: message.includeSelectedText ?? true,
       includeWorkspaceTree: message.includeWorkspaceTree ?? false,
     };
-  }
-
-  private stopGeneration(): void {
-    this.currentAbortController?.abort();
-  }
-
-  private async sendChatMessage(
-    webviewView: vscode.WebviewView,
-    text: string,
-    contextOptions: ContextOptions,
-  ): Promise<void> {
-    const config = getExtensionConfig();
-    const provider = createProvider(config);
-    const abortController = new AbortController();
-
-    this.currentAbortController?.abort();
-    this.currentAbortController = abortController;
-
-    let assistantText = '';
-
-    try {
-      const context = await buildChatContext(config.contextMode, contextOptions);
-
-      webviewView.webview.postMessage({
-        type: 'contextStatus',
-        activeFilePath: context.activeFile?.path,
-      });
-
-      await this.chatManager.addMessage('user', text);
-      sendChatStore(webviewView, this.chatManager);
-
-      await provider.streamChat(
-        {
-          message: text,
-          context,
-        },
-        {
-          onStart: () => {
-            webviewView.webview.postMessage({
-              type: 'responseStart',
-            });
-          },
-          onChunk: (chunk: string) => {
-            assistantText += chunk;
-
-            webviewView.webview.postMessage({
-              type: 'responseChunk',
-              text: chunk,
-            });
-          },
-          onEnd: () => {
-            webviewView.webview.postMessage({
-              type: 'responseEnd',
-            });
-          },
-        },
-        abortController.signal,
-      );
-
-      if (assistantText.trim()) {
-        await this.chatManager.addMessage('assistant', assistantText);
-        sendChatStore(webviewView, this.chatManager);
-        detectAndSendPatchPreviews(webviewView, this.patchPreviews, assistantText);
-      }
-    } catch (error) {
-      if (abortController.signal.aborted) {
-        if (assistantText.trim()) {
-          await this.chatManager.addMessage('assistant', assistantText);
-          sendChatStore(webviewView, this.chatManager);
-          detectAndSendPatchPreviews(webviewView, this.patchPreviews, assistantText);
-        }
-
-        webviewView.webview.postMessage({
-          type: 'responseStopped',
-        });
-        return;
-      }
-
-      const errorText = `Error: ${String(error)}`;
-
-      await this.chatManager.addMessage('assistant', errorText);
-      sendChatStore(webviewView, this.chatManager);
-
-      webviewView.webview.postMessage({
-        type: 'response',
-        text: errorText,
-      });
-
-      webviewView.webview.postMessage({
-        type: 'backendStatus',
-        status: 'disconnected',
-        backendUrl: config.providerUrl,
-        text: `Disconnected: ${String(error)}`,
-      });
-    } finally {
-      if (this.currentAbortController === abortController) {
-        this.currentAbortController = undefined;
-      }
-    }
   }
 }
