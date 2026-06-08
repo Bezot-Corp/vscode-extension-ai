@@ -1,5 +1,5 @@
 import { ExtensionConfig } from '../config/extension_config';
-import { ChatContext, ContextFile } from '../context/chat_context';
+import { ChatContext, ContextFile, ContextSelection } from '../context/chat_context';
 import { AiProvider, ChatRequest, ChatResult, ChatStreamHandler, ProviderStatus } from './ai_provider';
 
 type OllamaResponse = {
@@ -62,10 +62,11 @@ export class OllamaProvider implements AiProvider {
     };
   }
 
-  async streamChat(request: ChatRequest, handler: ChatStreamHandler): Promise<void> {
+  async streamChat(request: ChatRequest, handler: ChatStreamHandler, signal?: AbortSignal): Promise<void> {
     const response = await fetch(`${this.config.providerUrl}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal,
       body: JSON.stringify({
         model: this.config.model,
         stream: true,
@@ -89,6 +90,10 @@ export class OllamaProvider implements AiProvider {
     let buffer = '';
 
     while (true) {
+      if (signal?.aborted) {
+        throw new Error('Generation aborted');
+      }
+
       const { done, value } = await reader.read();
 
       if (done) {
@@ -149,6 +154,10 @@ function buildSystemPrompt(context: ChatContext): string {
     'Answer clearly and focus on practical code help.',
   ];
 
+  if (context.selectedText) {
+    parts.push(formatSelection(context.selectedText));
+  }
+
   if (context.activeFile) {
     parts.push(formatFile('Active file', context.activeFile));
   }
@@ -157,7 +166,20 @@ function buildSystemPrompt(context: ChatContext): string {
     parts.push('Open files:', ...context.openFiles.map((file) => formatFile('Open file', file)));
   }
 
+  if (context.workspaceFiles.length > 0) {
+    parts.push(`Workspace files:\n${context.workspaceFiles.map((file) => `- ${file}`).join('\n')}`);
+  }
+
   return parts.join('\n\n');
+}
+
+function formatSelection(selection: ContextSelection): string {
+  return `Selected text: ${selection.path}
+Language: ${selection.languageId}
+
+\`\`\`${selection.languageId}
+${selection.text}
+\`\`\``;
 }
 
 function formatFile(label: string, file: ContextFile): string {

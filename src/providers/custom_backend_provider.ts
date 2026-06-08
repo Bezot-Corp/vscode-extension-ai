@@ -47,12 +47,19 @@ export class CustomBackendProvider implements AiProvider {
     };
   }
 
-  async streamChat(request: ChatRequest, handler: ChatStreamHandler): Promise<void> {
+  async streamChat(request: ChatRequest, handler: ChatStreamHandler, signal?: AbortSignal): Promise<void> {
     handler.onStart();
 
-    const result = await this.chat(request);
+    const response = await fetch(`${this.config.providerUrl}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+      signal,
+    });
 
-    handler.onChunk(result.text);
+    const data = (await response.json()) as CustomBackendResponse;
+
+    handler.onChunk(data.content ?? data.error ?? 'no response');
     handler.onEnd();
   }
 }

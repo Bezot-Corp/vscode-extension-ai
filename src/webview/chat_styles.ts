@@ -43,11 +43,15 @@ body {
   gap: 6px;
 }
 
+#selected-text-status,
 #active-file-status,
 #open-files-status,
+#workspace-tree-status,
 #context-mode,
+#context-preview-selected-text,
 #context-preview-active-file,
-#context-preview-open-files {
+#context-preview-open-files,
+#context-preview-workspace-files {
   opacity: 0.8;
   font-size: 0.9em;
   word-break: break-all;
@@ -138,7 +142,8 @@ body {
   border-color: var(--vscode-focusBorder);
 }
 
-#send {
+#send,
+#stop {
   padding: 6px 14px;
   background: var(--vscode-button-background);
   color: var(--vscode-button-foreground);
@@ -148,11 +153,13 @@ body {
   font-size: inherit;
 }
 
-#send:hover {
+#send:hover,
+#stop:hover {
   background: var(--vscode-button-hoverBackground);
 }
 
-#send:disabled {
+#send:disabled,
+#stop:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
