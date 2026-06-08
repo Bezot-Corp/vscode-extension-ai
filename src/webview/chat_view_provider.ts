@@ -181,7 +181,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         updatedAt: session.updatedAt,
         messageCount: session.messages.length,
       })),
-      messages: activeSession.messages,
+      messages: activeSession?.messages ?? [],
     });
   }
 
