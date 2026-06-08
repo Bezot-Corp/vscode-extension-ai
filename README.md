@@ -17,6 +17,8 @@ Use Ollama today, connect your own backend, or integrate future BezotCorp servic
 Chat directly with AI inside VS Code.
 
 - Streaming responses
+- Persistent chat history
+- Stop generation support
 - Context-aware conversations
 - Provider abstraction
 - Backend health monitoring
@@ -25,8 +27,10 @@ Chat directly with AI inside VS Code.
 
 Provide useful context to the AI.
 
+- Selected text support
 - Active file support
 - Open files support
+- Workspace tree support
 - Rich workspace context
 - Context preview before requests
 
@@ -45,6 +49,15 @@ Built-in backend monitoring.
 - Connection testing
 - Status indicator
 - Provider diagnostics
+
+### Agent Foundations
+
+Early foundations for agent-style workflows.
+
+- Tool registry foundation
+- Selected text tool foundation
+- Workspace tree tool foundation
+- Patch preview foundation
 
 ### Local First
 
@@ -68,7 +81,7 @@ Install the extension from:
 
 ## Configuration
 
-### To Ollama
+### Configure Ollama
 
 ```json
 {
@@ -78,7 +91,7 @@ Install the extension from:
 }
 ```
 
-### To Custom Backend
+### Configure a Custom Backend
 
 ```json
 {
@@ -87,7 +100,7 @@ Install the extension from:
 }
 ```
 
-### To Context Mode
+### Configure Context Mode
 
 ```json
 {
@@ -123,15 +136,18 @@ BezotCorp AI: Open Settings
 ```text
 VS Code Extension
         │
-        ▼
-    AI Provider
-        │
-        ├── Ollama
-        ├── Custom Backend
-        └── Future BezotCorp Backend
+        ├── Chat UI
+        ├── Context Builder
+        ├── History Storage
+        ├── Tool Foundations
+        └── AI Provider
+                │
+                ├── Ollama
+                ├── Custom Backend
+                └── Future BezotCorp Backend
 ```
 
-The extension manages context collection, provider integration and streaming responses directly inside VS Code.
+The extension manages context collection, provider integration, history persistence and streaming responses directly inside VS Code.
 
 ---
 
@@ -141,17 +157,17 @@ BezotCorp AI does not require any cloud service.
 
 Privacy depends on the provider you choose.
 
-### Ollama
+### Ollama Privacy
 
 - Local execution
 - Local models
 - Local data
 
-### Custom Backend
+### Custom Backend Privacy
 
 - Privacy depends on your infrastructure
 
-### Future BezotCorp Backend
+### Future BezotCorp Backend Privacy
 
 - Policy will be documented separately
 
@@ -163,24 +179,33 @@ Privacy depends on the provider you choose.
 
 - AI chat
 - Streaming responses
+- Persistent chat history
+- Stop generation
+- Selected text context
 - Active file context
 - Open files context
+- Workspace tree context
 - Context preview
 - Backend status monitoring
 - Connection testing
 - Ollama integration
 - Custom backend integration
 - VS Code commands
+- Tool registry foundation
+- Selected text tool foundation
+- Workspace tree tool foundation
+- Patch preview foundation
 
 ### Planned
 
-- Chat history persistence
-- Patch preview
+- Patch preview UI
+- Patch apply/reject workflow
 - Multi-file editing
 - Workspace semantic graph
-- Tool calling
+- Tool calling execution
 - Agent orchestration
 - Memory integration
+- Provider profiles
 
 ### Future
 

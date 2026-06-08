@@ -24,5 +24,5 @@ export type ChatStreamHandler = {
 export interface AiProvider {
   health(): Promise<ProviderStatus>;
   chat(request: ChatRequest): Promise<ChatResult>;
-  streamChat(request: ChatRequest, handler: ChatStreamHandler): Promise<void>;
+  streamChat(request: ChatRequest, handler: ChatStreamHandler, signal?: AbortSignal): Promise<void>;
 }

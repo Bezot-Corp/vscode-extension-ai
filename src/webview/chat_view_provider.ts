@@ -12,15 +12,20 @@ type WebviewMessage = {
   text?: string;
   includeActiveFile?: boolean;
   includeOpenFiles?: boolean;
+  includeSelectedText?: boolean;
+  includeWorkspaceTree?: boolean;
 };
 
 type ContextOptions = {
   includeActiveFile: boolean;
   includeOpenFiles: boolean;
+  includeSelectedText: boolean;
+  includeWorkspaceTree: boolean;
 };
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   private readonly chatManager: ChatManager;
+  private currentAbortController: AbortController | undefined;
 
   constructor(
     private readonly extensionUri: vscode.Uri,
@@ -58,6 +63,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         return;
       }
 
+      if (message.type === 'stopGeneration') {
+        this.stopGeneration();
+        return;
+      }
+
       if (message.type === 'chat') {
         const contextOptions = this.getContextOptions(message);
 
@@ -82,6 +92,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     await this.sendContextPreview(webviewView, {
       includeActiveFile: true,
       includeOpenFiles: false,
+      includeSelectedText: true,
+      includeWorkspaceTree: false,
     });
   }
 
@@ -89,7 +101,13 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     return {
       includeActiveFile: message.includeActiveFile ?? true,
       includeOpenFiles: message.includeOpenFiles ?? false,
+      includeSelectedText: message.includeSelectedText ?? true,
+      includeWorkspaceTree: message.includeWorkspaceTree ?? false,
     };
+  }
+
+  private stopGeneration(): void {
+    this.currentAbortController?.abort();
   }
 
   private async testConnection(webviewView: vscode.WebviewView): Promise<void> {
@@ -120,6 +138,12 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   ): Promise<void> {
     const config = getExtensionConfig();
     const provider = createProvider(config);
+    const abortController = new AbortController();
+
+    this.currentAbortController?.abort();
+    this.currentAbortController = abortController;
+
+    let assistantText = '';
 
     try {
       const context = await buildChatContext(config.contextMode, contextOptions);
@@ -130,8 +154,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       });
 
       await this.chatManager.addMessage('user', text);
-
-      let assistantText = '';
 
       await provider.streamChat(
         {
@@ -158,12 +180,24 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             });
           },
         },
+        abortController.signal,
       );
 
       if (assistantText.trim()) {
         await this.chatManager.addMessage('assistant', assistantText);
       }
     } catch (error) {
+      if (abortController.signal.aborted) {
+        if (assistantText.trim()) {
+          await this.chatManager.addMessage('assistant', assistantText);
+        }
+
+        webviewView.webview.postMessage({
+          type: 'responseStopped',
+        });
+        return;
+      }
+
       const errorText = `Error: ${String(error)}`;
 
       await this.chatManager.addMessage('assistant', errorText);
@@ -179,6 +213,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         backendUrl: config.providerUrl,
         text: `Disconnected: ${String(error)}`,
       });
+    } finally {
+      if (this.currentAbortController === abortController) {
+        this.currentAbortController = undefined;
+      }
     }
   }
 
@@ -190,7 +228,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       type: 'contextPreview',
       mode: config.contextMode,
       activeFilePath: context.activeFile?.path,
+      selectedTextLength: context.selectedText?.text.length ?? 0,
       openFilesCount: context.openFiles.length,
+      workspaceFilesCount: context.workspaceFiles.length,
     });
   }
 }

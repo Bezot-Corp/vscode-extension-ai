@@ -27,6 +27,12 @@ ${getChatStyles()}
 
 <div id="context-card">
   <label>
+    <input id="include-selected-text" type="checkbox" checked>
+    Include selected text
+  </label>
+  <div id="selected-text-status">Selected text will be attached when available.</div>
+
+  <label>
     <input id="include-active-file" type="checkbox" checked>
     Include active file
   </label>
@@ -37,13 +43,21 @@ ${getChatStyles()}
     Include open files
   </label>
   <div id="open-files-status">Open files disabled.</div>
+
+  <label>
+    <input id="include-workspace-tree" type="checkbox">
+    Include workspace tree
+  </label>
+  <div id="workspace-tree-status">Workspace tree disabled.</div>
 </div>
 
 <div id="context-preview-card">
   <strong>Context</strong>
   <div id="context-mode">Mode: basic</div>
+  <div id="context-preview-selected-text">Selected text: none</div>
   <div id="context-preview-active-file">Active file: none</div>
   <div id="context-preview-open-files">Open files: 0</div>
+  <div id="context-preview-workspace-files">Workspace files: 0</div>
 </div>
 
 <div id="messages"></div>
@@ -51,6 +65,7 @@ ${getChatStyles()}
 <div id="input-area">
   <textarea id="input" placeholder="Ask anything..." rows="1"></textarea>
   <button id="send">Send</button>
+  <button id="stop" disabled>Stop</button>
 </div>
 
 <script>
