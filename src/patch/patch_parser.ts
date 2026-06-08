@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
-
-import { PatchCandidate } from './patch_candidate';
+import { PatchCandidate } from '.';
 
 const PATCH_BLOCK_REGEX = /```patch\s*([\s\S]*?)```/g;
 

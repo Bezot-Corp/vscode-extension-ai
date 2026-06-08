@@ -1,4 +1,4 @@
-export type DiffLineKind = 'unchanged' | 'removed' | 'added';
+import { DiffLineKind } from '.';
 
 export type DiffLine = {
   kind: DiffLineKind;

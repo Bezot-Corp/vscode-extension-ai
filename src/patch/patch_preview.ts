@@ -1,8 +1,7 @@
-import { DiffLine } from './diff_line';
-import { PatchCandidate } from './patch_candidate';
+import { DiffLine, PatchCandidate, PatchStatus } from '.';
 
 export type PatchPreview = {
   candidate: PatchCandidate;
   diffLines: DiffLine[];
-  status: 'pending' | 'accepted' | 'rejected';
+  status: PatchStatus;
 };

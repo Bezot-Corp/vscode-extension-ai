@@ -1,4 +1,4 @@
-import { getContextPreviewScript } from './context_preview_script';
+import { getContextPreviewScript } from '.';
 import { getMessageListScript } from './message_list_script';
 import { getPatchPreviewScript } from './patch_preview_script';
 

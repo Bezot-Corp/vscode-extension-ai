@@ -1,4 +1,4 @@
-import { ContextSelection } from '../../context/chat_context';
+import { ContextSelection } from '../../context';
 import { Tool, ToolExecutionResult } from '../tool';
 
 export class SelectedTextTool implements Tool {

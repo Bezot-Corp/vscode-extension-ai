@@ -1,14 +1,4 @@
-export type ContextFile = {
-  path: string;
-  languageId: string;
-  content: string;
-};
-
-export type ContextSelection = {
-  path: string;
-  languageId: string;
-  text: string;
-};
+import { ContextFile, ContextSelection } from '.';
 
 export type ChatContext = {
   mode: 'basic' | 'rich';

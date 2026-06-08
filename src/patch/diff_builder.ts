@@ -1,4 +1,4 @@
-import { DiffLine } from './diff_line';
+import { DiffLine } from '.';
 
 export function buildDiffLines(oldText: string, newText: string): DiffLine[] {
   const oldLines = oldText.split('\n');
