@@ -5,7 +5,7 @@ import { createBridgeServer } from './server/bridge_server';
 import { ChatViewProvider } from './webview/chat_view_provider';
 
 export function activate(context: vscode.ExtensionContext) {
-  const server = createBridgeServer();
+  const bridgeServer = createBridgeServer();
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push({
     dispose: () => {
-      server.close();
+      bridgeServer.dispose();
     },
   });
 }
