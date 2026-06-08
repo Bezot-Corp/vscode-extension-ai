@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.6.0...v1.7.0) (2026-06-08)
+
+
+### Features
+
+* add chat store and session management ([4265cf1](https://github.com/Bezot-Corp/vscode-extension-ai/commit/4265cf1b839fc4d8360cd0fdd4b3642250f71b9f))
+
 # [1.6.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.5.0...v1.6.0) (2026-06-08)
 
 
