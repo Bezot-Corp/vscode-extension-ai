@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.5.0...v1.6.0) (2026-06-08)
+
+
+### Features
+
+* add patch diff rendering ([99fee74](https://github.com/Bezot-Corp/vscode-extension-ai/commit/99fee74aedcfe08ed066043c09d044c5021749dc))
+
 # [1.5.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.4.0...v1.5.0) (2026-06-08)
 
 
