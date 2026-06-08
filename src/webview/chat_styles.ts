@@ -26,6 +26,38 @@ body {
   line-height: 1.4;
 }
 
+#chat-session-card {
+  padding: 10px;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+  background: var(--vscode-editor-background);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#chat-session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+#chat-session-select {
+  width: 100%;
+  padding: 5px 8px;
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  border: 1px solid var(--vscode-dropdown-border);
+  border-radius: 4px;
+}
+
+#chat-session-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 #context-card,
 #context-preview-card {
   padding: 10px;
@@ -75,6 +107,9 @@ body {
 
 #settings,
 #test-connection,
+#new-chat,
+#rename-chat,
+#delete-chat,
 #clear-history {
   padding: 5px 10px;
   background: var(--vscode-button-secondaryBackground);
@@ -86,6 +121,9 @@ body {
 
 #settings:hover,
 #test-connection:hover,
+#new-chat:hover,
+#rename-chat:hover,
+#delete-chat:hover,
 #clear-history:hover {
   background: var(--vscode-button-secondaryHoverBackground);
 }

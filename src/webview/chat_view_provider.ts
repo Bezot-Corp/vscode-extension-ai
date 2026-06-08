@@ -14,6 +14,8 @@ type WebviewMessage = {
   type: string;
   text?: string;
   patchId?: string;
+  sessionId?: string;
+  title?: string;
   includeActiveFile?: boolean;
   includeOpenFiles?: boolean;
   includeSelectedText?: boolean;
@@ -62,11 +64,53 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         return;
       }
 
-      if (message.type === 'clearHistory') {
-        await this.chatManager.clear();
+      if (message.type === 'newChat') {
+        await this.chatManager.createSession();
         this.patchPreviews.clear();
 
-        webviewView.webview.postMessage({ type: 'historyRestored', messages: [] });
+        this.sendChatStore(webviewView);
+        webviewView.webview.postMessage({ type: 'patchPreviews', previews: [] });
+        return;
+      }
+
+      if (message.type === 'switchChatSession') {
+        if (message.sessionId) {
+          await this.chatManager.setActiveSession(message.sessionId);
+          this.patchPreviews.clear();
+
+          this.sendChatStore(webviewView);
+          webviewView.webview.postMessage({ type: 'patchPreviews', previews: [] });
+        }
+
+        return;
+      }
+
+      if (message.type === 'renameChatSession') {
+        if (message.sessionId && message.title) {
+          await this.chatManager.renameSession(message.sessionId, message.title);
+          this.sendChatStore(webviewView);
+        }
+
+        return;
+      }
+
+      if (message.type === 'deleteChatSession') {
+        if (message.sessionId) {
+          await this.chatManager.deleteSession(message.sessionId);
+          this.patchPreviews.clear();
+
+          this.sendChatStore(webviewView);
+          webviewView.webview.postMessage({ type: 'patchPreviews', previews: [] });
+        }
+
+        return;
+      }
+
+      if (message.type === 'clearHistory') {
+        await this.chatManager.clearActiveSession();
+        this.patchPreviews.clear();
+
+        this.sendChatStore(webviewView);
         webviewView.webview.postMessage({ type: 'patchPreviews', previews: [] });
         return;
       }
@@ -100,10 +144,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   private async initialize(webviewView: vscode.WebviewView): Promise<void> {
     await this.chatManager.load();
 
-    webviewView.webview.postMessage({
-      type: 'historyRestored',
-      messages: this.chatManager.getMessages(),
-    });
+    this.sendChatStore(webviewView);
 
     await this.testConnection(webviewView);
 
@@ -112,6 +153,24 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       includeOpenFiles: false,
       includeSelectedText: true,
       includeWorkspaceTree: false,
+    });
+  }
+
+  private sendChatStore(webviewView: vscode.WebviewView): void {
+    const store = this.chatManager.getStore();
+    const activeSession = this.chatManager.getActiveSession();
+
+    webviewView.webview.postMessage({
+      type: 'chatStoreRestored',
+      activeSessionId: store.activeSessionId,
+      sessions: store.sessions.map((session) => ({
+        id: session.id,
+        title: session.title,
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
+        messageCount: session.messages.length,
+      })),
+      messages: activeSession.messages,
     });
   }
 
@@ -172,6 +231,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       });
 
       await this.chatManager.addMessage('user', text);
+      this.sendChatStore(webviewView);
 
       await provider.streamChat(
         {
@@ -203,12 +263,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
       if (assistantText.trim()) {
         await this.chatManager.addMessage('assistant', assistantText);
+        this.sendChatStore(webviewView);
         this.detectAndSendPatchPreviews(webviewView, assistantText);
       }
     } catch (error) {
       if (abortController.signal.aborted) {
         if (assistantText.trim()) {
           await this.chatManager.addMessage('assistant', assistantText);
+          this.sendChatStore(webviewView);
           this.detectAndSendPatchPreviews(webviewView, assistantText);
         }
 
@@ -221,6 +283,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       const errorText = `Error: ${String(error)}`;
 
       await this.chatManager.addMessage('assistant', errorText);
+      this.sendChatStore(webviewView);
 
       webviewView.webview.postMessage({
         type: 'response',

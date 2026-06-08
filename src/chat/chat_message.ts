@@ -5,3 +5,17 @@ export type ChatMessage = {
   content: string;
   createdAt: string;
 };
+
+export function createChatMessage(role: ChatRole, content: string): ChatMessage {
+  return {
+    role,
+    content,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+export function cloneChatMessage(message: ChatMessage): ChatMessage {
+  return {
+    ...message,
+  };
+}

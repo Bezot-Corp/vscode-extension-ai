@@ -1,45 +1,94 @@
-import { randomUUID } from 'node:crypto';
-
 import { ChatMessage, ChatRole } from './chat_message';
-import { ChatSession } from './chat_session';
+import { ChatSession, cloneChatSession } from './chat_session';
+import {
+  ChatStore,
+  clearActiveChatSession,
+  cloneChatStore,
+  createAndActivateChatSession,
+  createChatStore,
+  deleteChatSessionById,
+  getActiveChatSession,
+  normalizeChatStore,
+  renameChatSessionById,
+  setActiveChatSession,
+} from './chat_store';
 import { ChatStorage } from './chat_storage';
+import { addMessageToChatSession } from './chat_session';
 
 export class ChatManager {
-  private session: ChatSession = {
-    id: randomUUID(),
-    messages: [],
-  };
+  private store: ChatStore = createChatStore();
 
   constructor(private readonly storage: ChatStorage) {}
 
   async load(): Promise<void> {
-    const storedSession = await this.storage.load();
+    const stored = await this.storage.load();
 
-    if (storedSession) {
-      this.session = storedSession;
-    }
+    this.store = stored ? normalizeChatStore(stored) : createChatStore();
+  }
+
+  getStore(): ChatStore {
+    return cloneChatStore(this.store);
+  }
+
+  getSessions(): ChatSession[] {
+    return this.store.sessions.map(cloneChatSession);
+  }
+
+  getActiveSession(): ChatSession {
+    return cloneChatSession(getActiveChatSession(this.store));
   }
 
   getMessages(): ChatMessage[] {
-    return [...this.session.messages];
+    return [...getActiveChatSession(this.store).messages];
+  }
+
+  async createSession(title?: string): Promise<ChatSession> {
+    const session = createAndActivateChatSession(this.store, title);
+
+    await this.persist();
+
+    return cloneChatSession(session);
+  }
+
+  async setActiveSession(sessionId: string): Promise<ChatSession | undefined> {
+    const session = setActiveChatSession(this.store, sessionId);
+
+    if (!session) {
+      return undefined;
+    }
+
+    await this.persist();
+
+    return cloneChatSession(session);
+  }
+
+  async renameSession(sessionId: string, title: string): Promise<void> {
+    renameChatSessionById(this.store, sessionId, title);
+
+    await this.persist();
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    deleteChatSessionById(this.store, sessionId);
+
+    await this.persist();
   }
 
   async addMessage(role: ChatRole, content: string): Promise<void> {
-    this.session.messages.push({
-      role,
-      content,
-      createdAt: new Date().toISOString(),
-    });
+    addMessageToChatSession(getActiveChatSession(this.store), role, content);
 
-    await this.storage.save(this.session);
+    await this.persist();
   }
 
-  async clear(): Promise<void> {
-    this.session = {
-      id: randomUUID(),
-      messages: [],
-    };
+  async clearActiveSession(): Promise<void> {
+    clearActiveChatSession(this.store);
 
-    await this.storage.save(this.session);
+    await this.persist();
+  }
+
+  private async persist(): Promise<void> {
+    this.store = normalizeChatStore(this.store);
+
+    await this.storage.save(this.store);
   }
 }
