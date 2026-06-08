@@ -10,26 +10,8 @@ import { detectPatchPreviews } from '../patch/patch_detector';
 import { PatchPreview } from '../patch/patch_preview';
 import { createProvider } from '../providers/provider_factory';
 import { getChatHtml } from './html/chat_html';
-
-type WebviewMessage = {
-  type: string;
-  text?: string;
-  patchId?: string;
-  sessionId?: string;
-  title?: string;
-  model?: string;
-  includeActiveFile?: boolean;
-  includeOpenFiles?: boolean;
-  includeSelectedText?: boolean;
-  includeWorkspaceTree?: boolean;
-};
-
-type ContextOptions = {
-  includeActiveFile: boolean;
-  includeOpenFiles: boolean;
-  includeSelectedText: boolean;
-  includeWorkspaceTree: boolean;
-};
+import { ContextOptions } from './context_options';
+import { WebviewMessage } from '.';
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
   private readonly chatManager: ChatManager;
@@ -65,6 +47,16 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
       if (message.type === 'refreshModels') {
         await this.sendModelState(webviewView);
+        return;
+      }
+
+      if (message.type === 'updateProviderSettings') {
+        if (message.provider && message.providerUrl) {
+          await this.modelManager.updateProviderSettings(message.provider, message.providerUrl);
+          await this.testConnection(webviewView);
+          await this.sendModelState(webviewView);
+        }
+
         return;
       }
 

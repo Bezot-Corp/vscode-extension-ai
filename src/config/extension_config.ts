@@ -20,7 +20,7 @@ export function getExtensionConfig(): ExtensionConfig {
 
   return {
     provider: config.get<AiProviderKind>('provider', DEFAULT_PROVIDER),
-    providerUrl: config.get<string>('providerUrl', DEFAULT_PROVIDER_URL).replace(/\/$/, ''),
+    providerUrl: normalizeProviderUrl(config.get<string>('providerUrl', DEFAULT_PROVIDER_URL)),
     model: config.get<string>('model', DEFAULT_MODEL),
     contextMode: config.get<ContextMode>('contextMode', DEFAULT_CONTEXT_MODE),
   };
@@ -34,4 +34,31 @@ export async function updateExtensionModel(model: string): Promise<void> {
   }
 
   await vscode.workspace.getConfiguration('bezotcorpAi').update('model', cleanModel, vscode.ConfigurationTarget.Global);
+}
+
+export async function updateExtensionProvider(provider: AiProviderKind): Promise<void> {
+  await vscode.workspace
+    .getConfiguration('bezotcorpAi')
+    .update('provider', provider, vscode.ConfigurationTarget.Global);
+}
+
+export async function updateExtensionProviderUrl(providerUrl: string): Promise<void> {
+  const cleanProviderUrl = normalizeProviderUrl(providerUrl);
+
+  if (!cleanProviderUrl) {
+    return;
+  }
+
+  await vscode.workspace
+    .getConfiguration('bezotcorpAi')
+    .update('providerUrl', cleanProviderUrl, vscode.ConfigurationTarget.Global);
+}
+
+export async function updateExtensionProviderSettings(provider: AiProviderKind, providerUrl: string): Promise<void> {
+  await updateExtensionProvider(provider);
+  await updateExtensionProviderUrl(providerUrl);
+}
+
+function normalizeProviderUrl(providerUrl: string): string {
+  return providerUrl.trim().replace(/\/$/, '');
 }

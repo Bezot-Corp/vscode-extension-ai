@@ -1,5 +1,8 @@
 export function getModelManagementScript(): string {
   return `
+const providerSelect = document.getElementById('provider-select');
+const providerUrlInput = document.getElementById('provider-url-input');
+const applyProviderSettings = document.getElementById('apply-provider-settings');
 const modelSelect = document.getElementById('model-select');
 const modelInput = document.getElementById('model-input');
 const refreshModels = document.getElementById('refresh-models');
@@ -8,7 +11,13 @@ const activeModel = document.getElementById('active-model');
 const modelError = document.getElementById('model-error');
 
 function renderModelState(state) {
-  activeModel.textContent = 'Provider: ' + state.provider + ' | Model: ' + state.activeModel;
+  providerSelect.value = state.provider;
+  providerUrlInput.value = state.providerUrl;
+  activeModel.textContent =
+    'Provider: ' + state.provider +
+    ' | URL: ' + state.providerUrl +
+    ' | Model: ' + state.activeModel;
+
   modelInput.value = state.activeModel;
   modelError.textContent = state.error ? 'Model loading error: ' + state.error : '';
 
@@ -35,6 +44,23 @@ function changeModel(model) {
     model: model.trim(),
   });
 }
+
+function updateProviderSettings() {
+  const provider = providerSelect.value;
+  const providerUrl = providerUrlInput.value.trim();
+
+  if (!provider || !providerUrl) {
+    return;
+  }
+
+  vscode.postMessage({
+    type: 'updateProviderSettings',
+    provider,
+    providerUrl,
+  });
+}
+
+applyProviderSettings.addEventListener('click', updateProviderSettings);
 
 refreshModels.addEventListener('click', () => {
   vscode.postMessage({ type: 'refreshModels' });

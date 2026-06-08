@@ -1,4 +1,10 @@
-import { ExtensionConfig, getExtensionConfig, updateExtensionModel } from '../config/extension_config';
+import {
+  AiProviderKind,
+  ExtensionConfig,
+  getExtensionConfig,
+  updateExtensionModel,
+  updateExtensionProviderSettings,
+} from '../config/extension_config';
 import { ModelInfo } from './model_info';
 import { createModelProvider } from './model_registry';
 
@@ -44,6 +50,12 @@ export class ModelManager {
 
   async setActiveModel(model: string): Promise<ModelState> {
     await updateExtensionModel(model);
+
+    return this.getState();
+  }
+
+  async updateProviderSettings(provider: AiProviderKind, providerUrl: string): Promise<ModelState> {
+    await updateExtensionProviderSettings(provider, providerUrl);
 
     return this.getState();
   }
