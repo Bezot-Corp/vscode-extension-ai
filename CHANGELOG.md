@@ -1,3 +1,16 @@
+# [1.8.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.7.0...v1.8.0) (2026-06-08)
+
+
+### Bug Fixes
+
+* handle missing active chat session ([efbbe4d](https://github.com/Bezot-Corp/vscode-extension-ai/commit/efbbe4d1efc24a3ede5d633296f9e4bc0197c88d))
+
+
+### Features
+
+* add model management ([60c6468](https://github.com/Bezot-Corp/vscode-extension-ai/commit/60c646880a9f50084fce3591b2aecfe83c70cbe9))
+* add model management ([bd3216d](https://github.com/Bezot-Corp/vscode-extension-ai/commit/bd3216d2ed9f19e736c9eb2d7c9546b2e7bbd25d))
+
 # [1.7.0](https://github.com/Bezot-Corp/vscode-extension-ai/compare/v1.6.0...v1.7.0) (2026-06-08)
 
 
