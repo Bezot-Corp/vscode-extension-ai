@@ -227,5 +227,26 @@ body {
   opacity: 0.75;
   font-size: 0.9em;
 }
+  .patch-preview-status {
+  opacity: 0.85;
+  font-size: 0.9em;
+}
+
+.patch-preview-error {
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--vscode-inputValidation-errorBackground);
+  color: var(--vscode-inputValidation-errorForeground);
+  border: 1px solid var(--vscode-inputValidation-errorBorder);
+  font-size: 0.9em;
+}
+
+.patch-preview-accepted {
+  border-color: var(--vscode-testing-iconPassed);
+}
+
+.patch-preview-rejected {
+  opacity: 0.65;
+}
 `;
 }
