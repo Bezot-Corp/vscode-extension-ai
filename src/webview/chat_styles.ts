@@ -163,5 +163,69 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+#patch-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.patch-preview-card {
+  padding: 10px;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+  background: var(--vscode-editor-background);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.patch-preview-file,
+.patch-preview-label {
+  opacity: 0.85;
+  font-size: 0.9em;
+  word-break: break-all;
+}
+
+.patch-preview-label {
+  font-weight: 600;
+}
+
+.patch-preview-code {
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--vscode-textCodeBlock-background);
+  color: var(--vscode-editor-foreground);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+}
+
+.patch-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.patch-preview-actions button {
+  padding: 5px 10px;
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.patch-preview-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.patch-preview-actions span {
+  opacity: 0.75;
+  font-size: 0.9em;
+}
 `;
 }

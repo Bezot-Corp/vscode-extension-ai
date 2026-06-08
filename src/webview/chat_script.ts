@@ -24,6 +24,7 @@ const contextPreviewSelectedText = document.getElementById('context-preview-sele
 const contextPreviewActiveFile = document.getElementById('context-preview-active-file');
 const contextPreviewOpenFiles = document.getElementById('context-preview-open-files');
 const contextPreviewWorkspaceFiles = document.getElementById('context-preview-workspace-files');
+const patchPreviewContainer = document.getElementById('patch-preview-container');
 
 let currentAssistantMessage = null;
 
@@ -142,6 +143,66 @@ function updateContextStatus(selectedTextLength, activeFilePath, openFilesCount,
   }
 }
 
+function renderPatchPreviews(previews) {
+  patchPreviewContainer.textContent = '';
+
+  for (const preview of previews) {
+    const card = document.createElement('div');
+    card.className = 'patch-preview-card';
+
+    const title = document.createElement('strong');
+    title.textContent = 'Patch Preview';
+
+    const file = document.createElement('div');
+    file.className = 'patch-preview-file';
+    file.textContent = 'File: ' + preview.candidate.path;
+
+    const oldLabel = document.createElement('div');
+    oldLabel.className = 'patch-preview-label';
+    oldLabel.textContent = 'Old';
+
+    const oldCode = document.createElement('pre');
+    oldCode.className = 'patch-preview-code';
+    oldCode.textContent = preview.candidate.oldText;
+
+    const newLabel = document.createElement('div');
+    newLabel.className = 'patch-preview-label';
+    newLabel.textContent = 'New';
+
+    const newCode = document.createElement('pre');
+    newCode.className = 'patch-preview-code';
+    newCode.textContent = preview.candidate.newText;
+
+    const actions = document.createElement('div');
+    actions.className = 'patch-preview-actions';
+
+    const accept = document.createElement('button');
+    accept.textContent = 'Accept';
+    accept.disabled = true;
+
+    const reject = document.createElement('button');
+    reject.textContent = 'Reject';
+    reject.disabled = true;
+
+    const hint = document.createElement('span');
+    hint.textContent = 'Apply / reject coming soon';
+
+    actions.appendChild(accept);
+    actions.appendChild(reject);
+    actions.appendChild(hint);
+
+    card.appendChild(title);
+    card.appendChild(file);
+    card.appendChild(oldLabel);
+    card.appendChild(oldCode);
+    card.appendChild(newLabel);
+    card.appendChild(newCode);
+    card.appendChild(actions);
+
+    patchPreviewContainer.appendChild(card);
+  }
+}
+
 function updateContextPreview(mode, activeFilePath, selectedTextLength, openFilesCount, workspaceFilesCount) {
   contextMode.textContent = 'Mode: ' + mode;
 
@@ -232,6 +293,10 @@ window.addEventListener('message', (event) => {
   if (msg.type === 'backendStatus') {
     updateBackendStatus(msg.status, msg.text, msg.backendUrl);
   }
+
+  if (msg.type === 'patchPreviews') {
+  renderPatchPreviews(msg.previews);
+}
 
   if (msg.type === 'contextPreview') {
     updateContextPreview(
