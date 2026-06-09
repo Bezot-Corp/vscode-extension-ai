@@ -1,5 +1,9 @@
-import type { WsEvent } from './ws_event';
-import type { WsRequest } from './ws_request';
-import type { WsResponse } from './ws_response';
+import { z } from 'zod';
 
-export type WsMessage = WsRequest | WsResponse | WsEvent;
+import { WsEventSchema } from './ws_event';
+import { WsRequestSchema } from './ws_request';
+import { WsResponseSchema } from './ws_response';
+
+export const WsMessageSchema = z.discriminatedUnion('kind', [WsRequestSchema, WsResponseSchema, WsEventSchema]);
+
+export type WsMessage = z.infer<typeof WsMessageSchema>;
