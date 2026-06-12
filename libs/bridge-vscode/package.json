@@ -1,0 +1,11 @@
+{
+  "name": "@bezot/bridge-vscode",
+  "version": "0.0.0",
+  "private": false,
+  "type": "commonjs",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "@types/vscode": "^1.120.0"
+  }
+}

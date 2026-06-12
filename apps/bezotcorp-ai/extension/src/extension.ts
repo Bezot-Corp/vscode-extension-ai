@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { SystemBackend } from './backend/system';
+import { SystemBackend } from '../backend/system';
 
 let backend: SystemBackend | undefined;
 
