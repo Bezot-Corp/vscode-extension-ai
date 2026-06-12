@@ -1,5 +1,7 @@
 packages:
-  - "."
+  - "apps/*/frontend"
+  - "apps/*/backend"
+  - "libs/*"
 
 onlyBuiltDependencies:
   - "@vscode/vsce-sign"
@@ -10,4 +12,4 @@ allowBuilds:
   "keytar": true
 
 minimumReleaseAgeExclude:
-  - '@types/node@25.9.2'
+  - "@types/node@25.9.2"
